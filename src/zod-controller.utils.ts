@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import z, { type ZodObject } from 'zod';
+import z, { ZodType, type ZodObject } from 'zod';
 import {
     type ControllerErrorModel,
     type ErrorBaseCreatingPayload,
@@ -18,7 +18,7 @@ type SuccessResponse<ResponseZodSchema> = ResponseZodSchema extends undefined
 type ZodAPISchemas = {
     body?: ZodObject;
     query?: ZodObject;
-    response?: ZodObject;
+    response?: ZodType;
 };
 
 type ErrorResponse = {
@@ -53,7 +53,7 @@ type EndpointLogic<T extends ZodAPISchemas> = {
             endpointError: EndpointErrorGenerator;
         }
     ) => Promise<
-        T['response'] extends ZodObject ? z.infer<T['response']> : void
+        T['response'] extends ZodType ? z.infer<T['response']> : void
     >;
 
     guards?: Guard[];
