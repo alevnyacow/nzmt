@@ -32,7 +32,9 @@ Returns zod module method generator.
 1. How to make a method generator:
 
 ```ts
-const mathServiceMethods = methods({
+import { Module } from '@alevnyacow/nzmt'
+
+const mathServiceMethods = Module.methods({
     // Service name, will be used in errors
     name: 'MathService', 
     // Method schemas description
