@@ -99,7 +99,7 @@ function createDefaultConfig() {
 
 }
 
-if (command === 'init-config') {
+if (command === 'init') {
     createDefaultConfig()
     process.exit(0)
 }
