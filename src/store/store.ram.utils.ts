@@ -124,8 +124,14 @@ export const InRAM = <T extends Metadata>(
 
         public ___mapUpdatePayloadToDetail = (
             prevValue: Types<Store>['details'],
-            update: Types<Store>['updatePayload']
+            rawUpdate: Types<Store>['updatePayload']
         ): Types<Store>['details'] => {
+            const update = Object.fromEntries(
+                Object.entries(rawUpdate as object).filter(([, value]) => {
+                    return value !== undefined;
+                })
+            );
+
             return {
                 ...(prevValue as object),
                 ...(update as object)
