@@ -46,4 +46,11 @@ export class Pagination {
             zeroBasedIndex: this.model.zeroBasedIndex - 1
         });
     }
+
+    get previousPage_UNSAFE() {
+        return Pagination.create({
+            pageSize: this.model.pageSize,
+            zeroBasedIndex: this.model.zeroBasedIndex - 1
+        });
+    }
 }
