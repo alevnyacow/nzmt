@@ -79,7 +79,8 @@ function createDefaultConfig() {
                 providers: './src/backend/providers',
                 controllers: './src/backend/controllers',
                 entities: './src/shared/entities',
-                queries: './src/client/shared/queries'
+                queries: './src/client/shared/queries',
+                di: './src/backend/dependency-injection'
             },
             dependencyInjection: {
                 inversifyjs: {
@@ -456,7 +457,6 @@ if (command === 'service') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateService(lowerCase, upperCase, false)
     process.exit(0)
-
 }
 
 if (command === 'crud') {
@@ -464,4 +464,5 @@ if (command === 'crud') {
     generateEntity(upperCase)
     generateStores(lowerCase, upperCase)
     generateService(lowerCase, upperCase, true)
+    process.exit(0)
 }
