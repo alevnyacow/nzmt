@@ -74,7 +74,7 @@ export const methods =
                                     ? {
                                           error: payload,
                                           code: payload,
-                                          details: payload
+                                          details: parsedPayload
                                       }
                                     : payload,
                                 cause

@@ -128,7 +128,7 @@ function generateStores(lowerCase, upperCase) {
         "",
         "\tactionsPayload: {",
         config?.paths?.entities ? `\t\tcreate: ${upperCase}.schema.omit({ id: true }),` : "\t\tcreate: z.object({ }),",
-        config?.paths?.entities ? `\t\tupdate: ${upperCase}.schema.omit({ id: true }),` : "\t\tupdate: z.object({ }),",
+        config?.paths?.entities ? `\t\tupdate: ${upperCase}.schema.omit({ id: true }).partial(),` : "\t\tupdate: z.object({ }),",
         "\t},",
         "",
         `\tname: '${upperCase}Store'`,
