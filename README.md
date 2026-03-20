@@ -66,7 +66,7 @@ export class MathService {
 
     public DIVIDED_BY_ZERO = 'DIVIDED_BY_ZERO'
 
-    public basicMathOperation = this.methods(
+    public basicOperation = this.methods(
         // Method name, working TS intellisense
         'basicOperation',
         // handler logic
@@ -111,7 +111,7 @@ export class MathService {
 const mathService = new MathService();
 
 // types infered from zod schemas, working intellisense
-const { result } = mathService.basicMathOperation({
+const { result } = mathService.basicOperation({
     lhs: 10,
     rhs: 15,
     operation: '+'
