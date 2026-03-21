@@ -317,22 +317,18 @@ if (command === 'entity') {
 }
 
 function generateService(lowerCase, upperCase, withCrud) {
-
-    const serviceName = withCrud ? entityName + 's' : entityName 
-    const folder = config?.paths?.services ? path.resolve(process.cwd(), config?.paths?.services, serviceName) : path.resolve(process.cwd(), serviceName);
+    const folder = config?.paths?.services ? path.resolve(process.cwd(), config?.paths?.services, entityName) : path.resolve(process.cwd(), entityName);
 
     fs.mkdirSync(folder, { recursive: true })
 
     // Metadata
-    const [lowerCaseService, upperCaseService] = camelizeVariants(serviceName) 
-
     if (withCrud) {
-        fs.writeFileSync(path.resolve(folder, `${serviceName}.service.metadata.ts`), [
+        fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
             "import { type Module, Entities } from '@alevnyacow/nzmt'",
             "import z from 'zod'",
             `import { ${lowerCase}StoreMetadata } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
             "",
-            `export const ${lowerCaseService}ServiceMetadata = {`,
+            `export const ${lowerCase}ServiceMetadata = {`,
             `\tname: '${upperCase}sService',`,
             "\tschemas: {",
             "\t\tgetSpecific: {",
@@ -376,10 +372,10 @@ function generateService(lowerCase, upperCase, withCrud) {
             "\t}",
             "} satisfies Module.Metadata",
             "",
-            `export type ${upperCaseService}ServiceDTOs = Module.DTOs<typeof ${lowerCaseService}ServiceMetadata>`
+            `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
         ].filter(x => typeof x === 'string').join('\n'))
     } else {
-        fs.writeFileSync(path.resolve(folder, `${serviceName}.service.metadata.ts`), [
+        fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
             "import type { Module } from '@alevnyacow/nzmt'",
             "",
             `export const ${lowerCase}ServiceMetadata = {`,
@@ -394,20 +390,20 @@ function generateService(lowerCase, upperCase, withCrud) {
     // Service body
 
     if (withCrud) {
-        fs.writeFileSync(path.resolve(folder, `${serviceName}.service.ts`), [
+        fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
             config?.dependencyInjection?.inversifyjs ? "import { injectable, inject } from 'inversify'" : undefined,
             config?.dependencyInjection?.inversifyjs?.storeTokensImport ?? undefined,
             `import type { ${upperCase}Store } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
-            `import { ${lowerCaseService}ServiceMetadata } from './${serviceName}.service.metadata'`,
+            `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
             "import { Module } from '@alevnyacow/nzmt'",
             config?.dependencyInjection?.inversifyjs ? "@injectable()" : undefined,
-            `export class ${upperCaseService}Service {`,
+            `export class ${upperCase}Service {`,
             `\tconstructor(`,
             config?.dependencyInjection?.inversifyjs?.storeTokensImport ? `\t\t@inject(${getImportName(config?.dependencyInjection?.inversifyjs?.storeTokensImport)}.${lowerCase}s)` : undefined,
             `\t\tprivate readonly ${lowerCase}s: ${upperCase}Store`,
             '\t) { }',
             '\t',
-            `\tprivate method = Module.methods(${lowerCaseService}ServiceMetadata)`,
+            `\tprivate method = Module.methods(${lowerCase}ServiceMetadata)`,
             '\t',
             `\tcreate = this.method('create', this.${lowerCase}s.create);`,
             '\t',
@@ -433,7 +429,7 @@ function generateService(lowerCase, upperCase, withCrud) {
             "}"
         ].filter(x => typeof x === 'string').join('\n'))
     } else {
-        fs.writeFileSync(path.resolve(folder, `${serviceName}.service.ts`), [
+        fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
             config?.dependencyInjection?.inversifyjs ? "import { injectable } from 'inversify'" : undefined,
             `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
             "import { Module } from '@alevnyacow/nzmt'",
@@ -448,8 +444,8 @@ function generateService(lowerCase, upperCase, withCrud) {
     // Barrel
 
     fs.writeFileSync(path.resolve(folder, 'index.ts'), [
-        `export * from './${serviceName}.service.metadata'`,
-        `export * from './${serviceName}.service'`
+        `export * from './${entityName}.service.metadata'`,
+        `export * from './${entityName}.service'`
     ].join('\n'))
 }
 
