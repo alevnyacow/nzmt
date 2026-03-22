@@ -64,8 +64,6 @@ export class MathService {
     // created generator
     private methods = mathServiceMethods
 
-    public DIVIDED_BY_ZERO = 'DIVIDED_BY_ZERO'
-
     public basicOperation = this.methods(
         // Method name, working TS intellisense
         'basicOperation',
@@ -95,7 +93,7 @@ export class MathService {
                          * metadata like method name, zod module name
                          * or payload will present in this error object.
                          */ 
-                        throw methodError(DIVIDED_BY_ZERO)
+                        throw methodError('DIVIDED_BY_ZERO')
                     }
                     return { result: lhs / rhs }
                 }
