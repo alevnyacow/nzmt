@@ -247,31 +247,33 @@ if (command === 'init') {
     process.exit(0)
 }
 
-function generateStores(lowerCase, upperCase) {
+function generateStores(lowerCase, upperCase, withEntityPreset) {
     const folder = config?.paths?.stores ? path.resolve(process.cwd(), config?.paths?.stores, entityName) : path.resolve(process.cwd(), entityName);
 
     fs.mkdirSync(folder, { recursive: true })
+
+    const withEntity = withEntityPreset || (options ?? []).includes('with-entity')
 
     // Contract
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.ts`), [
         "import type { Store } from '@alevnyacow/nzmt'",
-        config?.paths?.entities ? `import { ${upperCase} } from '${config?.paths?.entities.replace('./src', '@')}/${entityName}'` : undefined,
+        withEntity ? `import { ${upperCase} } from '${config?.paths?.entities.replace('./src', '@')}/${entityName}'` : undefined,
         "",
         `export const ${lowerCase}StoreMetadata = {`,
         "\tmodels: {",
-        config?.paths?.entities ? `\t\tlist: ${upperCase}.schema,` : "\t\tlist: z.object({ }),",
-        config?.paths?.entities ? `\t\tdetails: ${upperCase}.schema,` : "\t\tdetails: z.object({ }),",
+        withEntity ? `\t\tlist: ${upperCase}.schema,` : "\t\tlist: z.object({ }),",
+        withEntity ? `\t\tdetails: ${upperCase}.schema,` : "\t\tdetails: z.object({ }),",
         "\t},",
         "",
         "\tsearchPayload: {",
-        config?.paths?.entities ? `\t\tlist: ${upperCase}.schema.omit({ id: true }),` : "\t\tlist: z.object({ }),",
-        config?.paths?.entities ? `\t\tspecific: ${upperCase}.schema.pick({ id: true }),` : "\t\tspecific: z.object({ }),",
+        withEntity ? `\t\tlist: ${upperCase}.schema.omit({ id: true }),` : "\t\tlist: z.object({ }),",
+        withEntity ? `\t\tspecific: ${upperCase}.schema.pick({ id: true }),` : "\t\tspecific: z.object({ }),",
         "\t},",
         "",
         "\tactionsPayload: {",
-        config?.paths?.entities ? `\t\tcreate: ${upperCase}.schema.omit({ id: true }),` : "\t\tcreate: z.object({ }),",
-        config?.paths?.entities ? `\t\tupdate: ${upperCase}.schema.omit({ id: true }).partial(),` : "\t\tupdate: z.object({ }),",
+        withEntity ? `\t\tcreate: ${upperCase}.schema.omit({ id: true }),` : "\t\tcreate: z.object({ }),",
+        withEntity ? `\t\tupdate: ${upperCase}.schema.omit({ id: true }).partial(),` : "\t\tupdate: z.object({ }),",
         "\t},",
         "",
         `\tname: '${upperCase}Store'`,
@@ -672,7 +674,7 @@ if (command === 'service') {
 if (command === 'crud') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateEntity(upperCase)
-    generateStores(lowerCase, upperCase)
+    generateStores(lowerCase, upperCase, true)
     generateService(lowerCase, upperCase, true)
     process.exit(0)
 }
