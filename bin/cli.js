@@ -439,6 +439,7 @@ if (command === 'store') {
 
 function generateEntity(upperCase) {
     const folder = config?.paths?.entities ? path.resolve(process.cwd(), config?.paths?.entities, entityName) : path.resolve(process.cwd(), entityName);
+    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-'))
 
     fs.mkdirSync(folder, { recursive: true })
 
@@ -451,7 +452,11 @@ function generateEntity(upperCase) {
         `export class ${upperCase} {`,
         "\tstatic schema = z.object({",
         "\t\tid: Entities.Identifier.schema,",
-        "\t\t",
+        fields.length ? 
+            fields.map(([fieldName, description]) => {
+                return `\t\t${fieldName}: z.${description.split('.').join('().')}(),`
+            }).join('\n')
+        : "\t\t",
         "\t})",
         "\t",
         `\tprivate constructor(private readonly data: ${upperCase}Model) {}`,
@@ -479,6 +484,7 @@ if (command === 'entity') {
 
 function generateValueObject(upperCase) {
     const folder = config?.paths?.valueObjects ? path.resolve(process.cwd(), config?.paths?.valueObjects, entityName) : path.resolve(process.cwd(), entityName);
+    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-'))
 
     fs.mkdirSync(folder, { recursive: true })
 
@@ -489,7 +495,11 @@ function generateValueObject(upperCase) {
         "",
         `export class ${upperCase} {`,
         "\tstatic schema = z.object({",
-        "\t\t",
+        fields.length ? 
+            fields.map(([fieldName, description]) => {
+                return `\t\t${fieldName}: z.${description.split('.').join('().')}(),`
+            }).join('\n')
+        : "\t\t",
         "\t})",
         "\t",
         `\tprivate constructor(private readonly data: ${upperCase}Model) {}`,
