@@ -111,7 +111,6 @@ function createDefaultConfig() {
             }
         }, null, '\t'))
     }
-
 }
 
 function initDI() {
@@ -410,6 +409,23 @@ function generateStores(lowerCase, upperCase) {
         `export * from './${entityName}.store.prisma.ts'`,
         `export * from './${entityName}.store.ram.ts'`
     ].join('\n'))
+
+    // update DI
+    
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Stores',
+        `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}PrismaStore, dev: ${upperCase}PrismaStore },`,
+    )
+
 }
 
 if (command === 'store') {
