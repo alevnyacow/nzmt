@@ -6,6 +6,30 @@ var args = process.argv.slice(2);
 
 var [command, entityName, ...options] = args;
 
+function insertAfterLineInFile(filePath, targetLine, newLine) {
+  let content = fs.readFileSync(filePath, 'utf8');
+
+  const lines = content.split('\n');
+  const index = lines.findIndex(line => line.includes(targetLine));
+
+  if (index !== -1) {
+    lines.splice(index + 1, 0, newLine);
+    fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+  }
+}
+
+function insertBeforeLineInFile(filePath, targetLine, newLine) {
+  const content = fs.readFileSync(filePath, 'utf8');
+  const lines = content.split('\n');
+
+  const index = lines.findIndex(line => line.includes(targetLine));
+
+  if (index !== -1) {
+    lines.splice(index, 0, newLine);
+    fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+  }
+}
+
 function camelizeVariants(str) {
     if (!str.includes('-')) {
         return [str, str.substring(0, 1).toUpperCase() + str.substring(1)]
@@ -100,6 +124,7 @@ function initDI() {
     // Entries
     fs.writeFileSync(path.resolve(folder, `entries.di.ts`), [
         "import type { BindInWhenOnFluentSyntax } from 'inversify'",
+        "",
         "type DIEntries = Record<",
         "\tstring,",
         "\t| (new (...args: any[]) => any)",
@@ -500,7 +525,7 @@ function generateService(lowerCase, upperCase, withCrud) {
             "\tschemas: {}",
             "} satisfies Module.Metadata",
             "",
-            `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>"`
+            `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
         ].filter(x => typeof x === 'string').join('\n'))
     }
 
@@ -564,6 +589,22 @@ function generateService(lowerCase, upperCase, withCrud) {
         `export * from './${entityName}.service.metadata'`,
         `export * from './${entityName}.service'`
     ].join('\n'))
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ${upperCase}Service } from '${config?.paths?.services.replace('./src', '@')}/${entityName}}'\n`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Services',
+        `\t${upperCase}Service,`,
+    )
 }
 
 if (command === 'service') {
