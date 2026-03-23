@@ -99,6 +99,7 @@ function createDefaultConfig() {
                 providers: './src/server/providers',
                 controllers: './src/server/controllers',
                 entities: './src/shared/entities',
+                valueObjects: './src/shared/value-objects',
                 queries: './src/client/shared/queries'
             },
             store: {
@@ -473,6 +474,45 @@ if (command === 'entity') {
     generateEntity(upperCase)
     process.exit(0)
 }
+
+function generateValueObject(upperCase) {
+    const folder = config?.paths?.valueObjects ? path.resolve(process.cwd(), config?.paths?.valueObjects, entityName) : path.resolve(process.cwd(), entityName);
+
+    fs.mkdirSync(folder, { recursive: true })
+
+    const body = [
+        "import z from 'zod'",
+        "",
+        `export type ${upperCase}Model = z.infer<typeof ${upperCase}.schema>`,
+        "",
+        `export class ${upperCase} {`,
+        "\tstatic schema = z.object({",
+        "\t\t",
+        "\t})",
+        "\t",
+        `\tprivate constructor(private readonly data: ${upperCase}Model) {}`,
+        "\t",
+        `\tstatic create = (data: ${upperCase}Model) => {`,
+        `\t\tconst parsedModel = ${upperCase}.schema.parse(data)`,
+        `\t\treturn new ${upperCase}(parsedModel)`,
+        "\t}",
+        "\t",
+        `\tget model(): ${upperCase}Model {`,
+        "\t\treturn this.data",
+        "\t}",
+        "}"
+    ].join('\n')
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.value-object.ts`), body)
+    fs.writeFileSync(path.resolve(folder, 'index.ts'), `export * from './${entityName}.value-object'`)
+}
+
+if (command === 'value-object') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateValueObject(upperCase)
+    process.exit(0)
+}
+
 
 function generateService(lowerCase, upperCase, withCrud) {
     const folder = config?.paths?.services ? path.resolve(process.cwd(), config?.paths?.services, entityName) : path.resolve(process.cwd(), entityName);
