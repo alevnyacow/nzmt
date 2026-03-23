@@ -34,7 +34,7 @@ Returns zod module method generator.
 ```ts
 import { Module } from '@alevnyacow/nzmt'
 
-const mathServiceMethods = Module.methods({
+const mathServiceMetadata = {
     // Service name, will be used in errors
     name: 'MathService', 
     // Method schemas description
@@ -53,8 +53,16 @@ const mathServiceMethods = Module.methods({
             })
         },
         // ...another methods
-    } 
-})
+    }
+/**
+ * Use `... satisfies Module.Metadata` instead of 
+ * `const mathServiceMetadata: Module.Metadata = ...`
+ * for correct TS autocompletion in your IDE when 
+ * using `Module.methods`.
+ */ 
+} satisfies Module.Metadata 
+
+const mathServiceMethods = Module.methods(mathServiceMetadata)
 ```
 
 2. How to use this generator (example with class, you can use it also without classes):
