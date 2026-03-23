@@ -4,12 +4,7 @@ import path from "path";
 
 var args = process.argv.slice(2);
 
-var [command, entityName, options = ''] = args;
-
-function getImportName(str) {
-  const match = str.match(/import\s*{\s*([^}]+)\s*}/);
-  return match ? match[1].trim() : null;
-}
+var [command, entityName, ...options] = args;
 
 function camelizeVariants(str) {
     if (!str.includes('-')) {
@@ -74,24 +69,19 @@ function createDefaultConfig() {
 
         fs.writeFileSync(path.resolve(projectRoot, 'nzmt.config.json'), JSON.stringify({
             paths: {
-                stores: './src/backend/stores',
-                services: './src/backend/services',
-                providers: './src/backend/providers',
-                controllers: './src/backend/controllers',
+                di: './src/server/di',
+                stores: './src/server/stores',
+                services: './src/server/services',
+                providers: './src/server/providers',
+                controllers: './src/server/controllers',
                 entities: './src/shared/entities',
-                queries: './src/client/shared/queries',
-                di: './src/backend/dependency-injection'
-            },
-            dependencyInjection: {
-                inversifyjs: {
-                    storeTokensImport: "import { DIStores } from '@/backend/di'"
-                }
+                queries: './src/client/shared/queries'
             },
             store: {
                 prisma: {
                     import: [
-                        "import { prisma } from '@/backend/infrastructure/prisma'",
-                        "import type { Prisma } from '@/backend/generated-prisma/client'",
+                        "import { prisma } from '@/server/infrastructure/prisma'",
+                        "import type { Prisma } from '@/server/generated-prisma/client'",
                     ]
                 },
             }
@@ -100,8 +90,135 @@ function createDefaultConfig() {
 
 }
 
+function initDI() {
+    const config = loadConfig()
+    const diPath = config?.paths?.di
+
+    const folder = path.resolve(process.cwd(), diPath)
+    fs.mkdirSync(folder, { recursive: true })
+
+    // Entries
+    fs.writeFileSync(path.resolve(folder, `entries.di.ts`), [
+        "import type { BindInWhenOnFluentSyntax } from 'inversify'",
+        "type DIEntries = Record<",
+        "\tstring,",
+        "\t| (new (...args: any[]) => any)",
+        "\t| Record<'test' | 'dev' | 'prod',",
+        "\t\t| [new (...args: any[]) => any, (x: BindInWhenOnFluentSyntax<unknown>) => any]",
+        "\t\t| (new (...args: any[]) => any)",
+        "\t>",
+        ">",
+        "",
+        "export const diEntries = {",
+        "\t// Stores",
+        "\t// Providers",
+        "\t// Services",
+        "\t// Controllers",
+        "\t// Other",
+        "} satisfies DIEntries",
+        "",
+        "export type DITokens = keyof typeof diEntries",
+    ].join('\n'))
+
+    // Containers
+    fs.writeFileSync(path.resolve(folder, `container.dev.di.ts`), [
+        "import { Container } from 'inversify'",
+        "import { diEntries } from './entries.di'",
+        "",
+        "const container = new Container()",
+        "",
+        "for (const rule in diEntries) {",
+        "\tconst ruleContentRaw = diEntries[rule as keyof typeof diEntries]",
+        "\tconst ruleContent =",
+        "\t\ttypeof ruleContentRaw === 'object'",
+        "\t\t\t? ruleContentRaw.dev",
+        "\t\t\t: ruleContentRaw",
+        "\tif (Array.isArray(ruleContent)) {",
+        "\t\tconst [Entry, builder] = ruleContent",
+        "\t\tbuilder(container.bind(rule).to(Entry))",
+        "\t\tcontinue",
+        "\t}",
+        "\tcontainer.bind(rule).to(ruleContent)",
+        "}",
+        "",
+        "export { container as devContainer }"
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `container.test.di.ts`), [
+        "import { Container } from 'inversify'",
+        "import { diEntries } from './entries.di'",
+        "",
+        "const container = new Container()",
+        "",
+        "for (const rule in diEntries) {",
+        "\tconst ruleContentRaw = diEntries[rule as keyof typeof diEntries]",
+        "\tconst ruleContent =",
+        "\t\ttypeof ruleContentRaw === 'object'",
+        "\t\t\t? ruleContentRaw.test",
+        "\t\t\t: ruleContentRaw",
+        "\tif (Array.isArray(ruleContent)) {",
+        "\t\tconst [Entry, builder] = ruleContent",
+        "\t\tbuilder(container.bind(rule).to(Entry))",
+        "\t\tcontinue",
+        "\t}",
+        "\tcontainer.bind(rule).to(ruleContent)",
+        "}",
+        "",
+        "export { container as testContainer }"
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `container.prod.di.ts`), [
+        "import { Container } from 'inversify'",
+        "import { diEntries } from './entries.di'",
+        "",
+        "const container = new Container()",
+        "",
+        "for (const rule in diEntries) {",
+        "\tconst ruleContentRaw = diEntries[rule as keyof typeof diEntries]",
+        "\tconst ruleContent =",
+        "\t\ttypeof ruleContentRaw === 'object'",
+        "\t\t\t? ruleContentRaw.prod",
+        "\t\t\t: ruleContentRaw",
+        "\tif (Array.isArray(ruleContent)) {",
+        "\t\tconst [Entry, builder] = ruleContent",
+        "\t\tbuilder(container.bind(rule).to(Entry))",
+        "\t\tcontinue",
+        "\t}",
+        "\tcontainer.bind(rule).to(ruleContent)",
+        "}",
+        "",
+        "export { container as prodContainer }"
+    ].join('\n'))
+
+    // Index
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        "import 'reflect-metadata'",
+        "import { devContainer } from './container.dev.di'",
+        "import { prodContainer } from './container.prod.di'",
+        "import { testContainer } from './container.test.di'",
+        "import type { DITokens } from './entries.di'",
+        "",
+        "const getActiveContainer = () => {",
+        "\tconst environment = process.env.NODE_ENV",
+        "\tif (environment === 'test') {",
+        "\t\treturn testContainer",
+        "\t}",
+        "\tif (environment === 'development') {",
+        "\t\treturn devContainer",
+        "\t}",
+        "\treturn prodContainer",
+        "}",
+        "",
+        "export const fromDI = <Result>(key: DITokens) => {",
+        "\tconst container = getActiveContainer()",
+        "\treturn container.get<Result>(key)",
+        "}"
+    ].join('\n'))
+};
+
 if (command === 'init') {
     createDefaultConfig()
+    initDI()
     process.exit(0)
 }
 
@@ -141,13 +258,13 @@ function generateStores(lowerCase, upperCase) {
     // RAM
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.ram.ts`), [
-        config?.dependencyInjection?.inversifyjs ? "import { injectable } from 'inversify'" : undefined,
+        "import { injectable } from 'inversify'",
         "import { Store } from '@alevnyacow/nzmt'",
         `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
         "",
         `const CRUDInRAM = Store.InRAM(${lowerCase}StoreMetadata)`,
         "",
-        config?.dependencyInjection?.inversifyjs ? "@injectable()" : undefined,
+        "@injectable()",
         `export class ${upperCase}RAMStore extends CRUDInRAM implements ${upperCase}Store {`,
         "\t",
         "}"
@@ -157,7 +274,7 @@ function generateStores(lowerCase, upperCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
         ...config?.store?.prisma?.import ?? [],
-        config?.dependencyInjection?.inversifyjs ? "import { injectable } from 'inversify'" : undefined,
+        "import { injectable } from 'inversify'",
         "import { Store } from '@alevnyacow/nzmt'",
         `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
         "",
@@ -196,7 +313,7 @@ function generateStores(lowerCase, upperCase) {
         "\t}",
         "}",
         "",
-        config?.dependencyInjection?.inversifyjs ? "@injectable()" : undefined,
+        "@injectable()",
         `export class ${upperCase}PrismaStore implements ${upperCase}Store {`,
         `\tprivate method = Store.methods(${lowerCase}StoreMetadata);`,
         "",
@@ -391,50 +508,50 @@ function generateService(lowerCase, upperCase, withCrud) {
 
     if (withCrud) {
         fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
-            config?.dependencyInjection?.inversifyjs ? "import { injectable, inject } from 'inversify'" : undefined,
-            config?.dependencyInjection?.inversifyjs?.storeTokensImport ?? undefined,
+            "import { injectable, inject } from 'inversify'",
+            `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
             `import type { ${upperCase}Store } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
             `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
             "import { Module } from '@alevnyacow/nzmt'",
-            config?.dependencyInjection?.inversifyjs ? "@injectable()" : undefined,
+            "@injectable()",
             `export class ${upperCase}Service {`,
             `\tconstructor(`,
-            config?.dependencyInjection?.inversifyjs?.storeTokensImport ? `\t\t@inject(${getImportName(config?.dependencyInjection?.inversifyjs?.storeTokensImport)}.${lowerCase}s)` : undefined,
-            `\t\tprivate readonly ${lowerCase}s: ${upperCase}Store`,
+            `\t\t@inject('${upperCase}Store' satisfies DITokens)`,
+            `\t\tprivate readonly ${lowerCase}Store: ${upperCase}Store`,
             '\t) { }',
             '\t',
             `\tprivate method = Module.methods(${lowerCase}ServiceMetadata)`,
             '\t',
-            `\tcreate = this.method('create', this.${lowerCase}s.create);`,
+            `\tcreate = this.method('create', this.${lowerCase}Store.create);`,
             '\t',
             `\tgetSpecific = this.method('getSpecific', async (x) => {`,
-            `\t\tconst item = await this.${lowerCase}s.details(x);`,
+            `\t\tconst item = await ${lowerCase}Store.details(x);`,
             `\t\treturn { item };`,
             `\t})`,
             `\t`,
             `\tgetList = this.method('getList', async (x) => {`,
-            `\t\tconst items = await this.${lowerCase}s.list(x);`,
+            `\t\tconst items = await ${lowerCase}Store.list(x);`,
             `\t\treturn { items };`,
             `\t})`,
             `\t`,
             `\tupdateOne = this.method('updateOne', async (x) => {`,
-            `\t\tawait this.${lowerCase}s.updateOne(x);`,
+            `\t\tawait ${lowerCase}Store.updateOne(x);`,
             `\t\treturn {};`,
             `\t})`,
             `\t`,
             `\tdeleteOne = this.method('deleteOne', async (x) => {`,
-            `\t\tawait this.${lowerCase}s.deleteOne(x);`,
+            `\t\tawait ${lowerCase}Store.deleteOne(x);`,
             `\t\treturn {};`,
             `\t})`,
             "}"
         ].filter(x => typeof x === 'string').join('\n'))
     } else {
         fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
-            config?.dependencyInjection?.inversifyjs ? "import { injectable } from 'inversify'" : undefined,
+            "import { injectable } from 'inversify'",
             `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
             "import { Module } from '@alevnyacow/nzmt'",
             "",
-            config?.dependencyInjection === 'inversifyjs' ? "@injectable()" : undefined,
+            "@injectable()",
             `export class ${upperCase}Service {`,
             `\tprivate methods = Module.methods(${lowerCase}ServiceMetadata)`,
             "}"

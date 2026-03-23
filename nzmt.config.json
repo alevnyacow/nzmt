@@ -1,0 +1,19 @@
+{
+	"paths": {
+		"di": "./src/server/di",
+		"stores": "./src/server/stores",
+		"services": "./src/server/services",
+		"providers": "./src/server/providers",
+		"controllers": "./src/server/controllers",
+		"entities": "./src/shared/entities",
+		"queries": "./src/client/shared/queries"
+	},
+	"store": {
+		"prisma": {
+			"import": [
+				"import { prisma } from '@/server/infrastructure/prisma'",
+				"import type { Prisma } from '@/server/generated-prisma/client'"
+			]
+		}
+	}
+}
