@@ -116,6 +116,10 @@ const { result } = mathService.basicOperation({
 })
 ```
 
+### Metadata
+
+Desribes module metadata. Metadata is used as an argument in `methods`.
+
 ## <a id='controller'></a>Controller
 
 ## <a id='store'></a>Store
