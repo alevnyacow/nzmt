@@ -439,7 +439,7 @@ if (command.toLowerCase() === 'store' || command === 's') {
 
 function generateEntity(upperCase) {
     const folder = config?.paths?.entities ? path.resolve(process.cwd(), config?.paths?.entities, entityName) : path.resolve(process.cwd(), entityName);
-    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-'))
+    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-')).filter(x => x.length === 2)
 
     fs.mkdirSync(folder, { recursive: true })
 
@@ -484,7 +484,7 @@ if (command.toLowerCase() === 'entity' || command === 'e') {
 
 function generateValueObject(upperCase) {
     const folder = config?.paths?.valueObjects ? path.resolve(process.cwd(), config?.paths?.valueObjects, entityName) : path.resolve(process.cwd(), entityName);
-    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-'))
+    const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-')).filter(x => x.length === 2)
 
     fs.mkdirSync(folder, { recursive: true })
 
@@ -522,6 +522,74 @@ function generateValueObject(upperCase) {
 if (command.toLowerCase() === 'value-object' || command === 'vo') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateValueObject(upperCase)
+    process.exit(0)
+}
+
+function generateProvider(lowerCase, upperCase) {
+    const folder = config?.paths?.providers ? path.resolve(process.cwd(), config?.paths?.providers, entityName) : path.resolve(process.cwd(), entityName);
+    const providerType = options.find(x => x.startsWith('pt:'))?.split(':')?.at(1) ?? 'API'
+    
+    fs.mkdirSync(folder, { recursive: true })
+    
+    // Base
+    fs.writeFileSync(path.resolve(folder, `${entityName}.provider.ts`), [
+        `import { Module } from '@alevnyacow/nzmt'`,
+        '',
+        `export const ${lowerCase}ProviderMetadata = {`,
+        `\tname: '${upperCase}Provider'`,
+        `\tschemas: {}`,
+        `} satisfies Module.Metadata`,
+        ``,
+        `type Methods = Module.Methods<typeof ${lowerCase}ProviderMetadata>;`,
+        ``,
+        `export abstract class ${upperCase}Provider {`,
+        `\t`,
+        `}`
+    ].join('\n'))
+
+    // Mock
+    fs.writeFileSync(path.resolve(folder, `${entityName}.provider.mock.ts`), [
+        `import { ${upperCase}Provider } from './${entityName}.provider'`,
+        '',
+        `export class ${upperCase}MockProvider extends ${upperCase}Provider {`,
+        `\t`,
+        `}`
+    ].join('\n'))
+
+    // Provider
+    fs.writeFileSync(path.resolve(folder, `${entityName}.provider.${providerType.toLowerCase()}.ts`), [
+        `import { ${upperCase}Provider } from './${entityName}.provider'`,
+        '',
+        `export class ${upperCase}${providerType}Provider extends ${upperCase}Provider {`,
+        `\t`,
+        `}`
+    ].join('\n'))
+
+    // Barrel
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        `export * from './${entityName}.provider'`,
+        `export * from './${entityName}.provider.${providerType.toLowerCase()}'`
+    ].join('\n'))
+
+    // Update DI
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('./src', '@')}/${entityName}}'\n`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Providers',
+        `\t${upperCase}Provider: { test: ${upperCase}MockProvider, prod: ${upperCase}${providerType}Provider, dev: ${upperCase}${providerType}Provider },`,
+    )
+}
+
+if (command.toLowerCase() === 'provider' || command === 'p') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateProvider(lowerCase, upperCase)
     process.exit(0)
 }
 
