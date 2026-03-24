@@ -128,6 +128,41 @@ const { result } = mathService.basicOperation({
 
 Desribes module metadata. Metadata is used as an argument in `methods`.
 
+### DTOs
+
+Extracts all request and response DTOs for every method by `Metadata`.
+
+Example:
+
+```ts
+import { Module } from '@alevnyacow/nzmt'
+
+const testMetadata = {
+    name: 'TestService', 
+    schemas: {
+        testMethod: {
+            payload: z.object({     
+                stringField: z.string()
+            }),
+            response: z.object({ 
+                result: z.boolean() 
+            })
+        },
+    }
+} satisfies Module.Metadata
+
+type TestServiceDTOs = Module.DTOs<typeof testMetadata>
+
+/**
+ * TestServiceDTOs:
+ * {
+ *    testMethodPayload: { stringField: string }
+ *    testMethodResponse: { result: boolean }
+ * }
+ * 
+ */ 
+```
+
 ## <a id='controller'></a>Controller
 
 ## <a id='store'></a>Store
