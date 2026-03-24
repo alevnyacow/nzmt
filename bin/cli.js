@@ -471,13 +471,13 @@ function generateEntity(upperCase) {
 
     const body = [
         "import z from 'zod'",
-        "import { Entities } from '@alevnyacow/nzmt'",
+        "import { ValueObjects } from '@alevnyacow/nzmt'",
         "",
         `export type ${upperCase}Model = z.infer<typeof ${upperCase}.schema>`,
         "",
         `export class ${upperCase} {`,
         "\tstatic schema = z.object({",
-        "\t\tid: Entities.Identifier.schema,",
+        "\t\tid: ValueObjects.Identifier.schema,",
         fields.length ? 
             fields.map(([fieldName, description]) => {
                 return `\t\t${fieldName}: z.${description.split('.').join('().')}(),`
@@ -628,7 +628,7 @@ function generateService(lowerCase, upperCase, withCrud) {
     // Metadata
     if (withCrud) {
         fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
-            "import { type Module, Entities } from '@alevnyacow/nzmt'",
+            "import { type Module, ValueObjects } from '@alevnyacow/nzmt'",
             "import z from 'zod'",
             `import { ${lowerCase}StoreMetadata } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
             "",
@@ -646,7 +646,7 @@ function generateService(lowerCase, upperCase, withCrud) {
             `\t\tgetList: {`,
             `\t\t\tpayload: z.object({`,
             `\t\t\t\tfilter: ${lowerCase}StoreMetadata.searchPayload.list,`,
-            `\t\t\t\tpagination: Entities.Pagination.schema.optional()`,
+            `\t\t\t\tpagination: ValueObjects.Pagination.schema.optional()`,
             `\t\t\t}),`,
             `\t\t\tresponse: z.object({`,
             `\t\t\t\titems: z.array(${lowerCase}StoreMetadata.models.list)`,
@@ -664,7 +664,7 @@ function generateService(lowerCase, upperCase, withCrud) {
             `\t\t\t\tpayload: ${lowerCase}StoreMetadata.actionsPayload.create`,
             `\t\t\t}),`,
             `\t\t\tresponse: z.object({`,
-            `\t\t\t\tid: Entities.Identifier.schema`,
+            `\t\t\t\tid: ValueObjects.Identifier.schema`,
             `\t\t\t}),`,
             `\t\t},`,
             `\t\tdeleteOne: {`,
