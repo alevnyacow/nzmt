@@ -241,7 +241,7 @@ function initDI() {
     ].join('\n'))
 };
 
-if (command === 'init') {
+if (command.toLowerCase() === 'init' || command === 'i') {
     createDefaultConfig()
     initDI()
     process.exit(0)
@@ -431,7 +431,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
 }
 
-if (command === 'store') {
+if (command.toLowerCase() === 'store' || command === 's') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateStores(lowerCase, upperCase)
     process.exit(0);
@@ -476,7 +476,7 @@ function generateEntity(upperCase) {
     fs.writeFileSync(path.resolve(folder, 'index.ts'), `export * from './${entityName}.entity'`)
 }
 
-if (command === 'entity') {
+if (command.toLowerCase() === 'entity' || command === 'e') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateEntity(upperCase)
     process.exit(0)
@@ -519,7 +519,7 @@ function generateValueObject(upperCase) {
     fs.writeFileSync(path.resolve(folder, 'index.ts'), `export * from './${entityName}.value-object'`)
 }
 
-if (command === 'value-object') {
+if (command.toLowerCase() === 'value-object' || command === 'vo') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateValueObject(upperCase)
     process.exit(0)
@@ -675,13 +675,13 @@ function generateService(lowerCase, upperCase, withCrud) {
     )
 }
 
-if (command === 'service') {
+if (command.toLowerCase() === 'service' || command === 'S') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateService(lowerCase, upperCase, false)
     process.exit(0)
 }
 
-if (command === 'crud') {
+if (command.toLowerCase() === 'crud') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateEntity(upperCase)
     generateStores(lowerCase, upperCase, true)
