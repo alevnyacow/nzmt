@@ -1,7 +1,6 @@
 # NZMT - Next Zod Modules Toolkit
 
 [![npm version](https://badge.fury.io/js/@alevnyacow%2Fnzmt.svg)](https://badge.fury.io/js/@alevnyacow%2Fnzmt)
-![NPM Downloads](https://img.shields.io/npm/dm/%40alevnyacow%2Fnzmt)
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
 
 ## Structure
