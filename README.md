@@ -17,7 +17,7 @@ NZMT is an opinionated toolkit with scaffolding for building structured Next.js 
 
 1. Generate Prisma client.
 2. Install required peer dependencies (`inversify`, `zod`, `reflect-metadata`).
-2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your tsconfig.json.
+2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
 3. Run the following:
 
 ```bash
@@ -30,10 +30,10 @@ npx nzmt entity product f:title-string,price-int.positive
 # product store (with Prisma implementation, RAM implementation and DI)
 npx nzmt store product
 
-# product service with injected product store (with configured DI)
+# product service with injected product store (with DI)
 npx nzmt service product i:ProductStore
 
-# shop controller with injected shop service and logger (with configured DI)
+# shop controller with injected product service and logger (with DI)
 npx nzmt controller shop i:Logger,ProductService
 ```
 
