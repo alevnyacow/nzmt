@@ -91,24 +91,38 @@ function createDefaultConfig() {
             throw 'No package.json was found'
         }
 
-        fs.writeFileSync(path.resolve(projectRoot, 'nzmt.config.json'), JSON.stringify({
+        const prismaClientPathOption = [entityName, ...options].find(x => x.startsWith('prismaClientPath:')) 
+
+        let prismaClientPath = prismaClientPathOption ? prismaClientPathOption.split(':')[1] : undefined
+
+        fs.writeFileSync(path.resolve(projectRoot, 'nzmt.config.json'), JSON.stringify(prismaClientPath ? {
             paths: {
                 di: './src/server/di',
                 stores: './src/server/stores',
                 services: './src/server/services',
                 providers: './src/server/providers',
                 controllers: './src/server/controllers',
+                infrastructure: './src/server/infrastructure',
                 entities: './src/shared/entities',
                 valueObjects: './src/shared/value-objects',
-                queries: './src/client/shared/queries'
+                queries: './src/client/shared/queries',
             },
             store: {
                 prisma: {
-                    import: [
-                        "import { prisma } from '@/server/infrastructure/prisma'",
-                        "import type { Prisma } from '@/server/generated-prisma/client'",
-                    ]
+                    clientPath: prismaClientPath
                 },
+            }
+        } : {
+            paths: {
+                di: './src/server/di',
+                stores: './src/server/stores',
+                services: './src/server/services',
+                providers: './src/server/providers',
+                controllers: './src/server/controllers',
+                infrastructure: './src/server/infrastructure',
+                entities: './src/shared/entities',
+                valueObjects: './src/shared/value-objects',
+                queries: './src/client/shared/queries',
             }
         }, null, '\t'))
     }
@@ -267,9 +281,52 @@ function initDI() {
     ].join('\n'))
 };
 
+function initPrisma() {
+    const config = loadConfig()
+    const prismaClientPath = config?.store?.prisma?.clientPath
+    if (!prismaClientPath) {
+        return
+    }
+    const prismaFolder = path.resolve(process.cwd(), config?.paths?.infrastructure, 'prisma')
+    fs.mkdirSync(prismaFolder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(prismaFolder, 'client.ts'), [
+        `import { PrismaPg } from '@prisma/adapter-pg'`,
+        `import { PrismaClient } from '${prismaClientPath}'`,
+        ``,
+        `const adapter = new PrismaPg({`,
+        `\tconnectionString: process.env.DATABASE_URL`,
+        `})`,
+        ``,
+        `export const prismaClient = new PrismaClient({ adapter })`
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(prismaFolder, 'index.ts'), [
+        `export * from './client'`
+    ].join('\n'))
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { prismaClient } from '${config?.paths?.infrastructure.replace('./src', '@')}/prisma'\n`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Other',
+        `\tPrismaClient: { constantValue: prismaClient },`,
+    )
+}
+
 if (command.toLowerCase() === 'init' || command === 'i') {
     createDefaultConfig()
     initDI()
+    initPrisma()
+
     process.exit(0)
 }
 
@@ -324,120 +381,126 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     ].filter(x => typeof x === 'string').join('\n'))
 
     // Prisma
+    const prismaPath = config.store?.prisma?.clientPath
+    if (prismaPath) {
+        fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
+            `import type { Prisma, PrismaClient } from '${prismaPath}'`,
+            `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
+            "import { injectable } from 'inversify'",
+            "import { Store } from '@alevnyacow/nzmt'",
+            `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
+            "",
+            `type Types = Store.Types<${upperCase}Store>`,
+            "",
+            "const mappers = {",
+            `\ttoFindOnePayload: (source: Types['findOnePayload']): Prisma.${upperCase}WhereUniqueInput => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t},",
+            `\ttoFindListPayload: (source: Types['findListPayload']): Prisma.${upperCase}WhereInput => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t},",
+            `\ttoListModel: (source: Prisma.${upperCase}GetPayload<{}>): Types['listModel'] => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t},",
+            `\ttoDetails: (source: Prisma.${upperCase}GetPayload<{ include: { } }>): Types['details'] => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t},",
+            `\ttoCreatePayload: (source: Types['createPayload']): Prisma.${upperCase}CreateInput => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t},",
+            `\ttoUpdatePayload: (source: Types['updatePayload']): Prisma.${upperCase}UpdateInput => {`,
+            "\t\treturn {",
+            "\t\t\t",
+            "\t\t};",
+            "\t}",
+            "}",
+            "",
+            "@injectable()",
+            `export class ${upperCase}PrismaStore implements ${upperCase}Store {`,
+            `\tprivate method = Store.methods(${lowerCase}StoreMetadata);`,
+            "",
+            "\tconstructor(@inject('PrismaClient' satisfies DITokens) private readonly prismaClient: PrismaClient) {}",
+            "",
+            "\tlist = this.method('list', async ({ filter, pagination: { pageSize, zeroBasedIndex } = { pageSize: 1000, zeroBasedIndex: 0 }}) => {",
+            `\t\tconst list = await this.prismaClient.${lowerCase}.findMany({`,
+            "\t\t\twhere: mappers.toFindListPayload(filter),",
+            "\t\t\tskip: zeroBasedIndex * pageSize,",
+            "\t\t\ttake: pageSize",
+            "\t\t})",
+            "\t\t",
+            "\t\treturn list.map(mappers.toListModel)",
+            "\t});",
+            "",
+            "\tdetails = this.method('details', async ({ filter }) => {",
+            `\t\tconst details = await this.prismaClient.${lowerCase}.findUnique({`,
+            "\t\t\twhere: mappers.toFindOnePayload(filter),",
+            "\t\t\tinclude: {}",
+            "\t\t})",
+            "",
+            "\t\tif (!details) {",
+            "\t\t\treturn null",
+            "\t\t}",
+            "",
+            "\t\treturn mappers.toDetails(details)",
+            "\t});",
+            "",
+            "\tcreate = this.method('create', async ({ payload }) => {",
+            `\t\tconst { id } = await this.prismaClient.${lowerCase}.create({`,
+            "\t\t\tdata: mappers.toCreatePayload(payload),",
+            "\t\t\tselect: { id: true }",
+            "\t\t})",
+            "",
+            "\t\treturn { id }",
+            "\t});",
+            "",
+            "\tupdateOne = this.method('updateOne', async ({ filter, payload }) => {",
+            "\t\ttry {",
+            `\t\t\tawait this.prismaClient.${lowerCase}.update({`,
+            "\t\t\t\twhere: mappers.toFindOnePayload(filter),",
+            "\t\t\t\tdata: mappers.toUpdatePayload(payload),",
+            "\t\t\t})",
+            "",
+            "\t\t\treturn { success: true }",
+            "\t\t}",
+            "\t\tcatch {",
+            "\t\t\treturn { success: false }",
+            "\t\t}",
+            "\t});",
+            "",
+            "\tdeleteOne = this.method('deleteOne', async ({ filter }) => {",
+            "\t\ttry {",
+            `\t\t\tawait this.prismaClient.${lowerCase}.delete({`,
+            "\t\t\t\twhere: mappers.toFindOnePayload(filter),",
+            "\t\t\t})",
+            "",
+            "\t\t\treturn { success: true }",
+            "\t\t}",
+            "\t\tcatch {",
+            "\t\t\treturn { success: false }",
+            "\t\t}",
+            "\t});",
+            "};"
+        ].filter(x => typeof x === 'string').join('\n'))
+    }
 
-    fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
-        ...config?.store?.prisma?.import ?? [],
-        "import { injectable } from 'inversify'",
-        "import { Store } from '@alevnyacow/nzmt'",
-        `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
-        "",
-        `type Types = Store.Types<${upperCase}Store>`,
-        "",
-        "const mappers = {",
-        `\ttoFindOnePayload: (source: Types['findOnePayload']): Prisma.${upperCase}WhereUniqueInput => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t},",
-        `\ttoFindListPayload: (source: Types['findListPayload']): Prisma.${upperCase}WhereInput => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t},",
-        `\ttoListModel: (source: Prisma.${upperCase}GetPayload<{}>): Types['listModel'] => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t},",
-        `\ttoDetails: (source: Prisma.${upperCase}GetPayload<{ include: { } }>): Types['details'] => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t},",
-        `\ttoCreatePayload: (source: Types['createPayload']): Prisma.${upperCase}CreateInput => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t},",
-        `\ttoUpdatePayload: (source: Types['updatePayload']): Prisma.${upperCase}UpdateInput => {`,
-        "\t\treturn {",
-        "\t\t\t",
-        "\t\t};",
-        "\t}",
-        "}",
-        "",
-        "@injectable()",
-        `export class ${upperCase}PrismaStore implements ${upperCase}Store {`,
-        `\tprivate method = Store.methods(${lowerCase}StoreMetadata);`,
-        "",
-        "\tlist = this.method('list', async ({ filter, pagination: { pageSize, zeroBasedIndex } = { pageSize: 1000, zeroBasedIndex: 0 }}) => {",
-        `\t\tconst list = await prisma.${lowerCase}.findMany({`,
-        "\t\t\twhere: mappers.toFindListPayload(filter),",
-        "\t\t\tskip: zeroBasedIndex * pageSize,",
-        "\t\t\ttake: pageSize",
-        "\t\t})",
-        "\t\t",
-        "\t\treturn list.map(mappers.toListModel)",
-        "\t});",
-        "",
-        "\tdetails = this.method('details', async ({ filter }) => {",
-        `\t\tconst details = await prisma.${lowerCase}.findUnique({`,
-        "\t\t\twhere: mappers.toFindOnePayload(filter),",
-        "\t\t\tinclude: {}",
-        "\t\t})",
-        "",
-        "\t\tif (!details) {",
-        "\t\t\treturn null",
-        "\t\t}",
-        "",
-        "\t\treturn mappers.toDetails(details)",
-        "\t});",
-        "",
-        "\tcreate = this.method('create', async ({ payload }) => {",
-        `\t\tconst { id } = await prisma.${lowerCase}.create({`,
-        "\t\t\tdata: mappers.toCreatePayload(payload),",
-        "\t\t\tselect: { id: true }",
-        "\t\t})",
-        "",
-        "\t\treturn { id }",
-        "\t});",
-        "",
-        "\tupdateOne = this.method('updateOne', async ({ filter, payload }) => {",
-        "\t\ttry {",
-        `\t\t\tawait prisma.${lowerCase}.update({`,
-        "\t\t\t\twhere: mappers.toFindOnePayload(filter),",
-        "\t\t\t\tdata: mappers.toUpdatePayload(payload),",
-        "\t\t\t})",
-        "",
-        "\t\t\treturn { success: true }",
-        "\t\t}",
-        "\t\tcatch {",
-        "\t\t\treturn { success: false }",
-        "\t\t}",
-        "\t});",
-        "",
-        "\tdeleteOne = this.method('deleteOne', async ({ filter }) => {",
-        "\t\ttry {",
-        `\t\t\tawait prisma.${lowerCase}.delete({`,
-        "\t\t\t\twhere: mappers.toFindOnePayload(filter),",
-        "\t\t\t})",
-        "",
-        "\t\t\treturn { success: true }",
-        "\t\t}",
-        "\t\tcatch {",
-        "\t\t\treturn { success: false }",
-        "\t\t}",
-        "\t});",
-        "};"
-    ].filter(x => typeof x === 'string').join('\n'))
 
     // barrel
 
     fs.writeFileSync(path.resolve(folder, 'index.ts'), [
         `export * from './${entityName}.store.ts'`,
-        `export * from './${entityName}.store.prisma.ts'`,
+        prismaPath ? `export * from './${entityName}.store.prisma.ts'` : undefined,
         `export * from './${entityName}.store.ram.ts'`
-    ].join('\n'))
+    ].filter(x => typeof x === 'string').join('\n'))
 
     // update DI
     
@@ -446,13 +509,13 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n`
+        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n`
     )
 
     insertAfterLineInFile(
         diEntriesPath,
         '// Stores',
-        `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}PrismaStore, dev: ${upperCase}PrismaStore },`,
+        prismaPath ? `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}PrismaStore, dev: ${upperCase}PrismaStore },` : `\t${upperCase}Store: ${upperCase}RAMStore,`,
     )
 
 }
