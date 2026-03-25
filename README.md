@@ -37,6 +37,22 @@ npx nzmt service product i:ProductStore
 npx nzmt controller shop i:Logger,ProductService
 ```
 
+The entire structure and infrastructure have been generated. All that remains is developing the contracts and the logic. The organization and content of the generated files are clear, and they’re easy to understand.
+
+You can use `fromDI` method anywhere you need an instance of a controller or a service:
+
+```ts
+// app/api/shop/route.ts
+
+import { ShopController } from "@/server/controllers/shop"
+import { fromDI } from "@/server/di"
+
+const controller = fromDI<ShopController>('ShopController')
+
+// Suppose you have implemented the list_GET method in the controller.
+export const GET = controller.list_GET
+```
+
 # Design principles
 
 ## Core idea
