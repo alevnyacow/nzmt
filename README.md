@@ -13,11 +13,16 @@ NZMT is an opinionated toolkit with scaffolding for building structured Next.js 
 - ⚡ **Dependency Injection** powered by Inversify with no setup required.
 - 🚀 Comes with **scaffolding system** to generate and organize application structure via CLI.
 
-# Quick start with scaffolding
+# Quick start (example with Prisma) 
+
+1. Generate Prisma client.
+2. Install required peer dependencies (`inversify`, `zod`, `reflect-metadata`).
+2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your tsconfig.json.
+3. Run the following:
 
 ```bash
 # scaffolder initialization with Prisma (must be done once)
-npx nzmt init prismaClientPath:@prisma/client
+npx nzmt init prismaClientPath:./app/generated/prisma/client
 
 # product entity with title and price fields
 npx nzmt entity product f:title-string,price-int.positive

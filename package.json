@@ -1,6 +1,6 @@
 {
   "name": "@alevnyacow/nzmt",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Next Zod Modules Toolkit",
   "repository": {
     "type": "git",
@@ -44,7 +44,8 @@
   "peerDependencies": {
     "next": ">=13 <17",
     "zod": ">=4 <5",
-    "inversify": ">=7 <9"
+    "inversify": ">=7 <9",
+    "reflect-metadata": "^0.2.2"
   },
   "private": false
 }

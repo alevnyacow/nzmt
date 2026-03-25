@@ -433,7 +433,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
         fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
             `import type { Prisma, PrismaClient } from '${prismaPath}'`,
             `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
-            "import { injectable } from 'inversify'",
+            "import { injectable, inject } from 'inversify'",
             "import { Store } from '@alevnyacow/nzmt'",
             `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
             "",
@@ -771,7 +771,7 @@ function generateService(lowerCase, upperCase) {
     // Service body
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
-        "import { injectable } from 'inversify'",
+        "import { injectable, inject } from 'inversify'",
         injections.length ? `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'` : undefined,
         `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
         "import { Module } from '@alevnyacow/nzmt'",
@@ -859,7 +859,7 @@ function generateController(upperCase, lowerCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.ts`), [
         `import { Controller } from '@alevnyacow/nzmt'`,
-        `import { injectable } from 'inversify'`,
+        `import { injectable, inject } from 'inversify'`,
         `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
         `import { ${lowerCase}ControllerMetadata } from './${entityName}.controller.metadata'`,
         ...importInjections,
