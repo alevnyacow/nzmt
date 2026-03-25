@@ -277,7 +277,9 @@ function initDI() {
         "export const fromDI = <Result>(key: DITokens) => {",
         "\tconst container = getActiveContainer()",
         "\treturn container.get<Result>(key)",
-        "}"
+        "}",
+        "",
+        "export { DITokens }"
     ].join('\n'))
 };
 
