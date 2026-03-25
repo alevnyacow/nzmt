@@ -20,10 +20,13 @@ npx nzmt init prismaClientPath:@prisma/client
 
 # product entity with title and price fields
 npx nzmt entity product f:title-string,price-int.positive
+
 # product store (with Prisma implementation, RAM implementation and DI)
 npx nzmt store product
-# product service with injected user store and product store
+
+# product service with injected product store
 npx nzmt service product i:ProductStore
+
 # shop controller with injected shop service and logger
 npx nzmt controller shop i:Logger,ProductService
 ```
