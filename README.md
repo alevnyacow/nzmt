@@ -1,4 +1,4 @@
-# Next Zod Modules Toolkit
+<img src='https://raw.githubusercontent.com/alevnyacow/nzmt/refs/heads/main/logo.svg?sanitize=true'></img>
 
 [![npm version](https://badge.fury.io/js/@alevnyacow%2Fnzmt.svg)](https://badge.fury.io/js/@alevnyacow%2Fnzmt)
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
@@ -60,13 +60,6 @@ There are also two building blocks shared across server and client: Entities and
 
 ## Setup
 
-1. Install required dependencies:
-```bash
-npm i inversify zod
-```
-These are not peer dependencies, so you can use NZMT with only required features.
-
-2. Initialize scaffolding:
 ```
 npx nzmt init prismaClientPath:@prisma/client
 ```
