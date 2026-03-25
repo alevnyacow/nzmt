@@ -30,10 +30,10 @@ npx nzmt entity product f:title-string,price-int.positive
 # product store (with Prisma implementation, RAM implementation and DI)
 npx nzmt store product
 
-# product service with injected product store
+# product service with injected product store (with configured DI)
 npx nzmt service product i:ProductStore
 
-# shop controller with injected shop service and logger
+# shop controller with injected shop service and logger (with configured DI)
 npx nzmt controller shop i:Logger,ProductService
 ```
 
