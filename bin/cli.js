@@ -97,15 +97,15 @@ function createDefaultConfig() {
 
         fs.writeFileSync(path.resolve(projectRoot, 'nzmt.config.json'), JSON.stringify(prismaClientPath ? {
             paths: {
-                di: './src/server/di',
-                stores: './src/server/stores',
-                services: './src/server/services',
-                providers: './src/server/providers',
-                controllers: './src/server/controllers',
-                infrastructure: './src/server/infrastructure',
-                entities: './src/shared/entities',
-                valueObjects: './src/shared/value-objects',
-                queries: './src/client/shared/queries',
+                di: './server/di',
+                stores: './server/stores',
+                services: './server/services',
+                providers: './server/providers',
+                controllers: './server/controllers',
+                infrastructure: './server/infrastructure',
+                entities: './shared/entities',
+                valueObjects: './shared/value-objects',
+                queries: './client/shared/queries',
             },
             store: {
                 prisma: {
@@ -114,15 +114,15 @@ function createDefaultConfig() {
             }
         } : {
             paths: {
-                di: './src/server/di',
-                stores: './src/server/stores',
-                services: './src/server/services',
-                providers: './src/server/providers',
-                controllers: './src/server/controllers',
-                infrastructure: './src/server/infrastructure',
-                entities: './src/shared/entities',
-                valueObjects: './src/shared/value-objects',
-                queries: './src/client/shared/queries',
+                di: './server/di',
+                stores: './server/stores',
+                services: './server/services',
+                providers: './server/providers',
+                controllers: './server/controllers',
+                infrastructure: './server/infrastructure',
+                entities: './shared/entities',
+                valueObjects: './shared/value-objects',
+                queries: './client/shared/queries',
             }
         }, null, '\t'))
     }
@@ -312,7 +312,7 @@ function initPrisma() {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { prismaClient } from '${config?.paths?.infrastructure.replace('./src', '@')}/prisma'`
+        `import { prismaClient } from '${config?.paths?.infrastructure.replace('.', '@')}/prisma'`
     )
 
     insertAfterLineInFile(
@@ -356,7 +356,7 @@ function initLogger() {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ConsoleLogger } from '${config?.paths?.infrastructure.replace('./src', '@')}/logger'`
+        `import { ConsoleLogger } from '${config?.paths?.infrastructure.replace('.', '@')}/logger'`
     )
 
     insertAfterLineInFile(
@@ -386,7 +386,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.ts`), [
         "import type { Store } from '@alevnyacow/nzmt'",
-        withEntity ? `import { ${upperCase} } from '${config?.paths?.entities.replace('./src', '@')}/${entityName}'` : undefined,
+        withEntity ? `import { ${upperCase} } from '${config?.paths?.entities.replace('.', '@')}/${entityName}'` : undefined,
         "",
         `export const ${lowerCase}StoreMetadata = {`,
         "\tmodels: {",
@@ -430,7 +430,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     if (prismaPath) {
         fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
             `import type { Prisma, PrismaClient } from '${prismaPath}'`,
-            `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
+            `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
             "import { injectable } from 'inversify'",
             "import { Store } from '@alevnyacow/nzmt'",
             `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
@@ -554,7 +554,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'`
+        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('.', '@')}/${entityName}'` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('.', '@')}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -711,7 +711,7 @@ function generateProvider(lowerCase, upperCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('./src', '@')}/${entityName}}'`
+        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('.', '@')}/${entityName}}'`
     )
 
     insertAfterLineInFile(
@@ -744,10 +744,10 @@ function generateService(lowerCase, upperCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '${config?.paths?.stores?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import { ${i} } from '${config?.paths?.stores?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
-        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('./src', '@')}/${toKebabFromPascal(i)}'`
+        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('.', '@')}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
@@ -770,7 +770,7 @@ function generateService(lowerCase, upperCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
         "import { injectable } from 'inversify'",
-        injections.length ? `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'` : undefined,
+        injections.length ? `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'` : undefined,
         `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
         "import { Module } from '@alevnyacow/nzmt'",
         ...importInjections,
@@ -801,7 +801,7 @@ function generateService(lowerCase, upperCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}Service } from '${config?.paths?.services.replace('./src', '@')}/${entityName}'`
+        `import { ${upperCase}Service } from '${config?.paths?.services.replace('.', '@')}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -828,14 +828,14 @@ function generateController(upperCase, lowerCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '${config?.paths?.stores?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import { ${i} } from '${config?.paths?.stores?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
         if (i.endsWith('Service')) {
-            return `import { ${i} } from '${config?.paths?.services?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
+            return `import { ${i} } from '${config?.paths?.services?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
         }
 
-        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('./src', '@')}/${toKebabFromPascal(i)}'`
+        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('.', '@')}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
@@ -858,7 +858,7 @@ function generateController(upperCase, lowerCase) {
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.ts`), [
         `import { Controller } from '@alevnyacow/nzmt'`,
         `import { injectable } from 'inversify'`,
-        `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
+        `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
         `import { ${lowerCase}ControllerMetadata } from './${entityName}.controller.metadata'`,
         ...importInjections,
         ``,
@@ -887,7 +887,7 @@ function generateController(upperCase, lowerCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}Controller } from '${config?.paths?.controllers.replace('./src', '@')}/${entityName}'`
+        `import { ${upperCase}Controller } from '${config?.paths?.controllers.replace('.', '@')}/${entityName}'`
     )
 
     insertAfterLineInFile(
