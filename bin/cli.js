@@ -18,14 +18,14 @@ function insertAfterLineInFile(filePath, targetLine, newLine) {
   }
 }
 
-function insertBeforeLineInFile(filePath, targetLine, newLine) {
+function insertBeforeLineInFile(filePath, targetLine, newLine, before = true) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
 
   const index = lines.findIndex(line => line.includes(targetLine));
 
   if (index !== -1) {
-    lines.splice(index, 0, newLine);
+    lines.splice(before ? index - 1 : index, 0, newLine);
     fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
   }
 }
@@ -155,7 +155,7 @@ function initDI() {
         "\t// Providers",
         "\t// Services",
         "\t// Controllers",
-        "\t// Other",
+        "\t// Infrastructure",
         "} satisfies DIEntries",
         "",
         "export type DITokens = keyof typeof diEntries",
@@ -312,13 +312,57 @@ function initPrisma() {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { prismaClient } from '${config?.paths?.infrastructure.replace('./src', '@')}/prisma'\n`
+        `import { prismaClient } from '${config?.paths?.infrastructure.replace('./src', '@')}/prisma'`
     )
 
     insertAfterLineInFile(
         diEntriesPath,
-        '// Other',
+        '// Infrastructure',
         `\tPrismaClient: { constantValue: prismaClient },`,
+    )
+}
+
+function initLogger() {
+    const config = loadConfig()
+    const loggerFolder = path.resolve(process.cwd(), config?.paths?.infrastructure, 'logger')
+    fs.mkdirSync(loggerFolder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(loggerFolder, 'logger.ts'), [
+        `export abstract class Logger {`,
+        `\tabstract error: (payload: Record<string, unknown>) => Promise<void>`,
+        `}`
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(loggerFolder, 'logger.console.ts'), [
+        `import { injectable } from 'inversify'`,
+        `import { Logger } from './logger'`,
+        '',
+        '@injectable()',
+        `export class ConsoleLogger extends Logger {`,
+        `\terror: Logger['error'] = async (payload) => console.error(payload)`,
+        `}`
+    ].join('\n'))
+
+
+    fs.writeFileSync(path.resolve(loggerFolder, 'index.ts'), [
+        `export * from './logger'`,
+        `export * from './logger.console'`
+    ].join('\n'))
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ConsoleLogger } from '${config?.paths?.infrastructure.replace('./src', '@')}/logger'`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Infrastructure',
+        `\tLogger: ConsoleLogger,`,
     )
 }
 
@@ -326,6 +370,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     createDefaultConfig()
     initDI()
     initPrisma()
+    initLogger()
 
     process.exit(0)
 }
@@ -335,7 +380,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
     fs.mkdirSync(folder, { recursive: true })
 
-    const withEntity = withEntityPreset || (options ?? []).includes('with-entity')
+    const withEntity = withEntityPreset || !(options ?? []).includes('dont-import-entity')
 
     // Contract
 
@@ -509,7 +554,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'\n`
+        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('./src', '@')}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -632,7 +677,7 @@ function generateProvider(lowerCase, upperCase) {
         `type Methods = Module.Methods<typeof ${lowerCase}ProviderMetadata>;`,
         ``,
         `export abstract class ${upperCase}Provider {`,
-        `\t`,
+        `\tprotected methods = Module.methods(${lowerCase}ProviderMetadata)`,
         `}`
     ].join('\n'))
 
@@ -650,7 +695,7 @@ function generateProvider(lowerCase, upperCase) {
         `import { ${upperCase}Provider } from './${entityName}.provider'`,
         '',
         `export class ${upperCase}${providerType}Provider extends ${upperCase}Provider {`,
-        `\t`,
+        `\tprotected method = zodModuleMethodFactory(mailProviderMetadata);`,
         `}`
     ].join('\n'))
 
@@ -666,7 +711,7 @@ function generateProvider(lowerCase, upperCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('./src', '@')}/${entityName}}'\n`
+        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('./src', '@')}/${entityName}}'`
     )
 
     insertAfterLineInFile(
@@ -682,131 +727,65 @@ if (command.toLowerCase() === 'provider' || command === 'p') {
     process.exit(0)
 }
 
+function toKebabFromPascal(str) {
+  return str
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+}
 
-function generateService(lowerCase, upperCase, withCrud) {
+function generateService(lowerCase, upperCase) {
     const folder = config?.paths?.services ? path.resolve(process.cwd(), config?.paths?.services, entityName) : path.resolve(process.cwd(), entityName);
+
+    const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+
+    const importInjections = injections.map((i) => {
+        if (i.endsWith('Service') || i.endsWith('Controller')) {
+            throw 'Only stores and infrastructure can be injected in services'
+        }
+
+        if (i.endsWith('Store')) {
+            return `import { ${i} } from '${config?.paths?.stores?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+        }
+
+        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('./src', '@')}/${toKebabFromPascal(i)}'`
+    })
 
     fs.mkdirSync(folder, { recursive: true })
 
     // Metadata
-    if (withCrud) {
-        fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
-            "import { type Module, ValueObjects } from '@alevnyacow/nzmt'",
-            "import z from 'zod'",
-            `import { ${lowerCase}StoreMetadata } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
-            "",
-            `export const ${lowerCase}ServiceMetadata = {`,
-            `\tname: '${upperCase}sService',`,
-            "\tschemas: {",
-            "\t\tgetSpecific: {",
-            `\t\t\tpayload: z.object({`,
-            `\t\t\t\tfilter: ${lowerCase}StoreMetadata.searchPayload.specific`,
-            `\t\t\t}),`,
-            `\t\t\tresponse: z.object({`,
-            `\t\t\t\titem: ${lowerCase}StoreMetadata.models.details.nullable()`,
-            `\t\t\t})`,
-            `\t\t},`,
-            `\t\tgetList: {`,
-            `\t\t\tpayload: z.object({`,
-            `\t\t\t\tfilter: ${lowerCase}StoreMetadata.searchPayload.list,`,
-            `\t\t\t\tpagination: ValueObjects.Pagination.schema.optional()`,
-            `\t\t\t}),`,
-            `\t\t\tresponse: z.object({`,
-            `\t\t\t\titems: z.array(${lowerCase}StoreMetadata.models.list)`,
-            `\t\t\t})`,
-            `\t\t},`,
-            `\t\tupdateOne: {`,
-            `\t\t\tpayload: z.object({`,
-            `\t\t\t\tfilter: ${lowerCase}StoreMetadata.searchPayload.specific,`,
-            `\t\t\t\tpayload: ${lowerCase}StoreMetadata.actionsPayload.update`,
-            `\t\t\t}),`,
-            `\t\t\tresponse: z.object({})`,
-            `\t\t},`,
-            `\t\tcreate: {`,
-            `\t\t\tpayload: z.object({`,
-            `\t\t\t\tpayload: ${lowerCase}StoreMetadata.actionsPayload.create`,
-            `\t\t\t}),`,
-            `\t\t\tresponse: z.object({`,
-            `\t\t\t\tid: ValueObjects.Identifier.schema`,
-            `\t\t\t}),`,
-            `\t\t},`,
-            `\t\tdeleteOne: {`,
-            `\t\t\tpayload: z.object({`,
-            `\t\t\t\tfilter: ${lowerCase}StoreMetadata.searchPayload.specific`,
-            `\t\t\t}),`,
-            `\t\t\tresponse: z.object({})`,
-            `\t\t},`,
-            "\t}",
-            "} satisfies Module.Metadata",
-            "",
-            `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
-        ].filter(x => typeof x === 'string').join('\n'))
-    } else {
-        fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
-            "import type { Module } from '@alevnyacow/nzmt'",
-            "",
-            `export const ${lowerCase}ServiceMetadata = {`,
-            `\tname: '${upperCase}Service',`,
-            "\tschemas: {}",
-            "} satisfies Module.Metadata",
-            "",
-            `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
-        ].filter(x => typeof x === 'string').join('\n'))
-    }
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
+        "import type { Module } from '@alevnyacow/nzmt'",
+        "",
+        `export const ${lowerCase}ServiceMetadata = {`,
+        `\tname: '${upperCase}Service',`,
+        "\tschemas: {}",
+        "} satisfies Module.Metadata",
+        "",
+        `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
+    ].filter(x => typeof x === 'string').join('\n'))
+    
 
     // Service body
 
-    if (withCrud) {
-        fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
-            "import { injectable, inject } from 'inversify'",
-            `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
-            `import type { ${upperCase}Store } from '${config?.paths?.stores?.replace('./src', '@')}/${entityName}'`,
-            `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
-            "import { Module } from '@alevnyacow/nzmt'",
-            "@injectable()",
-            `export class ${upperCase}Service {`,
-            `\tconstructor(`,
-            `\t\t@inject('${upperCase}Store' satisfies DITokens)`,
-            `\t\tprivate readonly ${lowerCase}Store: ${upperCase}Store`,
-            '\t) { }',
-            '\t',
-            `\tprivate method = Module.methods(${lowerCase}ServiceMetadata)`,
-            '\t',
-            `\tcreate = this.method('create', this.${lowerCase}Store.create);`,
-            '\t',
-            `\tgetSpecific = this.method('getSpecific', async (x) => {`,
-            `\t\tconst item = await ${lowerCase}Store.details(x);`,
-            `\t\treturn { item };`,
-            `\t})`,
-            `\t`,
-            `\tgetList = this.method('getList', async (x) => {`,
-            `\t\tconst items = await ${lowerCase}Store.list(x);`,
-            `\t\treturn { items };`,
-            `\t})`,
-            `\t`,
-            `\tupdateOne = this.method('updateOne', async (x) => {`,
-            `\t\tawait ${lowerCase}Store.updateOne(x);`,
-            `\t\treturn {};`,
-            `\t})`,
-            `\t`,
-            `\tdeleteOne = this.method('deleteOne', async (x) => {`,
-            `\t\tawait ${lowerCase}Store.deleteOne(x);`,
-            `\t\treturn {};`,
-            `\t})`,
-            "}"
-        ].filter(x => typeof x === 'string').join('\n'))
-    } else {
-        fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
-            "import { injectable } from 'inversify'",
-            `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
-            "import { Module } from '@alevnyacow/nzmt'",
-            "",
-            "@injectable()",
-            `export class ${upperCase}Service {`,
-            `\tprivate methods = Module.methods(${lowerCase}ServiceMetadata)`,
-            "}"
-        ].filter(x => typeof x === 'string').join('\n'))
-    }
+    fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
+        "import { injectable } from 'inversify'",
+        injections.length ? `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'` : undefined,
+        `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
+        "import { Module } from '@alevnyacow/nzmt'",
+        ...importInjections,
+        "",
+        "@injectable()",
+        `export class ${upperCase}Service {`,
+        `\tprivate methods = Module.methods(${lowerCase}ServiceMetadata)`,
+        ``,
+        `\tconstructor(`,
+        ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
+        `\t) {}`,
+        ``,
+        "}"
+    ].filter(x => typeof x === 'string').join('\n'))
+    
 
     // Barrel
 
@@ -822,7 +801,7 @@ function generateService(lowerCase, upperCase, withCrud) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}Service } from '${config?.paths?.services.replace('./src', '@')}/${entityName}}'\n`
+        `import { ${upperCase}Service } from '${config?.paths?.services.replace('./src', '@')}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -838,10 +817,88 @@ if (command.toLowerCase() === 'service' || command === 'S') {
     process.exit(0)
 }
 
-if (command.toLowerCase() === 'crud') {
+function generateController(upperCase, lowerCase) {
+    const folder = config?.paths?.controllers ? path.resolve(process.cwd(), config?.paths?.controllers, entityName) : path.resolve(process.cwd(), entityName);
+
+    const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+
+    const importInjections = injections.map((i) => {
+        if (i.endsWith('Controller')) {
+            throw 'Only stores, services and infrastructure can be injected in controllers'
+        }
+
+        if (i.endsWith('Store')) {
+            return `import { ${i} } from '${config?.paths?.stores?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+        }
+
+        if (i.endsWith('Service')) {
+            return `import { ${i} } from '${config?.paths?.services?.replace('./src', '@')}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
+        }
+
+        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('./src', '@')}/${toKebabFromPascal(i)}'`
+    })
+
+    fs.mkdirSync(folder, { recursive: true })
+
+    // Metadata
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.controller.metadata.ts`), [
+        `import { Controller } from '@alevnyacow/nzmt'`,
+        ``,
+        `export const ${lowerCase}ControllerMetadata = {`,
+        `\tname: '${upperCase}Controller',`,
+        `\tschemas: {}`,
+        `} satisfies Controller.Metadata`,
+        ``,
+        `export type ${upperCase}API = Controller.Contract<typeof ${lowerCase}ControllerMetadata>`
+    ].filter(x => typeof x === 'string').join('\n'))
+
+    // Body
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.controller.ts`), [
+        `import { Controller } from '@alevnyacow/nzmt'`,
+        `import { injectable } from 'inversify'`,
+        `import { DITokens } from '${config?.paths?.di?.replace('./src', '@')}'`,
+        `import { ${lowerCase}ControllerMetadata } from './${entityName}.controller.metadata'`,
+        ...importInjections,
+        ``,
+        `@injectable()`,
+        `export class ${upperCase}Controller {`,
+        `\tconstructor(`,
+        ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
+        `\t) {}`,
+        ``,
+        `\tprivate readonly endpoints = Controller.endpoints(${lowerCase}ControllerMetadata)`,
+        ``,
+        `}`
+    ].filter(x => typeof x === 'string').join('\n'))
+
+    // Barrel
+
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        `export * from './${entityName}.controller'`,
+        `export * from './${entityName}.controller.metadata'`
+    ].filter(x => typeof x === 'string').join('\n'))
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ${upperCase}Controller } from '${config?.paths?.controllers.replace('./src', '@')}/${entityName}'`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Controllers',
+        `\t${upperCase}Controller,`,
+    )
+}
+
+if (command.toLowerCase() === 'controller' || command === 'c') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
-    generateEntity(upperCase)
-    generateStores(lowerCase, upperCase, true)
-    generateService(lowerCase, upperCase, true)
+    generateController(upperCase, lowerCase)
     process.exit(0)
 }
