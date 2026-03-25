@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/@alevnyacow%2Fnzmt.svg)](https://badge.fury.io/js/@alevnyacow%2Fnzmt)
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
+![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt)
 
 # About
 
