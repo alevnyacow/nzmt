@@ -91,21 +91,26 @@ function createDefaultConfig() {
             throw 'No package.json was found'
         }
 
+        const folders = fs.readdirSync(projectRoot, { withFileTypes: true }).filter(x => x.isDirectory).map(x => x.name)
+        const withSrcFolder = folders.includes('src')
+        const coreFolder = withSrcFolder ? './src' : '.'
+        
         const prismaClientPathOption = [entityName, ...options].find(x => x.startsWith('prismaClientPath:')) 
 
         let prismaClientPath = prismaClientPathOption ? prismaClientPathOption.split(':')[1] : undefined
 
         fs.writeFileSync(path.resolve(projectRoot, 'nzmt.config.json'), JSON.stringify(prismaClientPath ? {
+            coreFolder,
             paths: {
-                di: './server/di',
-                stores: './server/stores',
-                services: './server/services',
-                providers: './server/providers',
-                controllers: './server/controllers',
-                infrastructure: './server/infrastructure',
-                entities: './shared/entities',
-                valueObjects: './shared/value-objects',
-                queries: './client/shared/queries',
+                di: '/server/di',
+                stores: '/server/stores',
+                services: '/server/services',
+                providers: '/server/providers',
+                controllers: '/server/controllers',
+                infrastructure: '/server/infrastructure',
+                entities: '/shared/entities',
+                valueObjects: '/shared/value-objects',
+                queries: '/client/shared/queries',
             },
             store: {
                 prisma: {
@@ -113,16 +118,17 @@ function createDefaultConfig() {
                 },
             }
         } : {
+            coreFolder,
             paths: {
-                di: './server/di',
-                stores: './server/stores',
-                services: './server/services',
-                providers: './server/providers',
-                controllers: './server/controllers',
-                infrastructure: './server/infrastructure',
-                entities: './shared/entities',
-                valueObjects: './shared/value-objects',
-                queries: './client/shared/queries',
+                di: '/server/di',
+                stores: '/server/stores',
+                services: '/server/services',
+                providers: '/server/providers',
+                controllers: '/server/controllers',
+                infrastructure: '/server/infrastructure',
+                entities: '/shared/entities',
+                valueObjects: '/shared/value-objects',
+                queries: '/client/shared/queries',
             }
         }, null, '\t'))
     }
@@ -132,7 +138,7 @@ function initDI() {
     const config = loadConfig()
     const diPath = config?.paths?.di
 
-    const folder = path.resolve(process.cwd(), diPath)
+    const folder = path.resolve(process.cwd(), `${config.coreFolder}${diPath}`)
     fs.mkdirSync(folder, { recursive: true })
 
     // Entries
@@ -289,12 +295,12 @@ function initPrisma() {
     if (!prismaClientPath) {
         return
     }
-    const prismaFolder = path.resolve(process.cwd(), config?.paths?.infrastructure, 'prisma')
+    const prismaFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'prisma')
     fs.mkdirSync(prismaFolder, { recursive: true })
 
     fs.writeFileSync(path.resolve(prismaFolder, 'client.ts'), [
         `import { PrismaPg } from '@prisma/adapter-pg'`,
-        `import { PrismaClient } from '${prismaClientPath.replace('.', '@')}'`,
+        `import { PrismaClient } from '@${prismaClientPath}'`,
         ``,
         `const adapter = new PrismaPg({`,
         `\tconnectionString: process.env.DATABASE_URL`,
@@ -309,12 +315,12 @@ function initPrisma() {
 
     // Update DI
 
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { prismaClient } from '${config?.paths?.infrastructure.replace('.', '@')}/prisma'`
+        `import { prismaClient } from '@${config?.paths?.infrastructure}/prisma'`
     )
 
     insertAfterLineInFile(
@@ -326,7 +332,7 @@ function initPrisma() {
 
 function initLogger() {
     const config = loadConfig()
-    const loggerFolder = path.resolve(process.cwd(), config?.paths?.infrastructure, 'logger')
+    const loggerFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'logger')
     fs.mkdirSync(loggerFolder, { recursive: true })
 
     fs.writeFileSync(path.resolve(loggerFolder, 'logger.ts'), [
@@ -353,12 +359,12 @@ function initLogger() {
 
     // Update DI
 
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ConsoleLogger } from '${config?.paths?.infrastructure.replace('.', '@')}/logger'`
+        `import { ConsoleLogger } from '@${config?.paths?.infrastructure}/logger'`
     )
 
     insertAfterLineInFile(
@@ -378,7 +384,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
 }
 
 function generateStores(lowerCase, upperCase, withEntityPreset) {
-    const folder = config?.paths?.stores ? path.resolve(process.cwd(), config?.paths?.stores, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.stores ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.stores}`, entityName) : path.resolve(process.cwd(), entityName);
 
     fs.mkdirSync(folder, { recursive: true })
 
@@ -388,7 +394,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.ts`), [
         "import type { Store } from '@alevnyacow/nzmt'",
-        withEntity ? `import { ${upperCase} } from '${config?.paths?.entities.replace('.', '@')}/${entityName}'` : undefined,
+        withEntity ? `import { ${upperCase} } from '@${config?.paths?.entities}/${entityName}'` : undefined,
         "",
         `export const ${lowerCase}StoreMetadata = {`,
         "\tmodels: {",
@@ -432,7 +438,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     if (prismaPath) {
         fs.writeFileSync(path.resolve(folder, `${entityName}.store.prisma.ts`), [
             `import type { Prisma, PrismaClient } from '${prismaPath}'`,
-            `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
+            `import { DITokens } from '@${config?.paths?.di}'`,
             "import { injectable, inject } from 'inversify'",
             "import { Store } from '@alevnyacow/nzmt'",
             `import { type ${upperCase}Store, ${lowerCase}StoreMetadata } from './${entityName}.store'`,
@@ -551,12 +557,12 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
     // update DI
     
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '${config?.paths?.stores.replace('.', '@')}/${entityName}'` : `import { ${upperCase}RAMStore } from '${config?.paths?.stores.replace('.', '@')}/${entityName}'`
+        prismaPath ? `import { ${upperCase}PrismaStore, ${upperCase}RAMStore } from '@${config?.paths?.stores}/${entityName}'` : `import { ${upperCase}RAMStore } from '@${config?.paths?.stores}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -574,7 +580,7 @@ if (command.toLowerCase() === 'store' || command === 's') {
 }
 
 function generateEntity(upperCase) {
-    const folder = config?.paths?.entities ? path.resolve(process.cwd(), config?.paths?.entities, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.entities ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.entities}`, entityName) : path.resolve(process.cwd(), entityName);
     const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-')).filter(x => x.length === 2)
 
     fs.mkdirSync(folder, { recursive: true })
@@ -619,7 +625,7 @@ if (command.toLowerCase() === 'entity' || command === 'e') {
 }
 
 function generateValueObject(upperCase) {
-    const folder = config?.paths?.valueObjects ? path.resolve(process.cwd(), config?.paths?.valueObjects, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.valueObjects ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.valueObjects}`, entityName) : path.resolve(process.cwd(), entityName);
     const fields = options.filter(x => x.startsWith('f:')).flatMap(x => x.split(':')[1]).join(',').split(',').map(x => x.split('-')).filter(x => x.length === 2)
 
     fs.mkdirSync(folder, { recursive: true })
@@ -662,7 +668,7 @@ if (command.toLowerCase() === 'value-object' || command === 'vo') {
 }
 
 function generateProvider(lowerCase, upperCase) {
-    const folder = config?.paths?.providers ? path.resolve(process.cwd(), config?.paths?.providers, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.providers ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.providers}`, entityName) : path.resolve(process.cwd(), entityName);
     const providerType = options.find(x => x.startsWith('pt:'))?.split(':')?.at(1) ?? 'API'
     
     fs.mkdirSync(folder, { recursive: true })
@@ -708,12 +714,12 @@ function generateProvider(lowerCase, upperCase) {
     ].join('\n'))
 
     // Update DI
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '${config?.paths?.providers.replace('.', '@')}/${entityName}}'`
+        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '@${config?.paths?.providers}/${entityName}}'`
     )
 
     insertAfterLineInFile(
@@ -736,7 +742,7 @@ function toKebabFromPascal(str) {
 }
 
 function generateService(lowerCase, upperCase) {
-    const folder = config?.paths?.services ? path.resolve(process.cwd(), config?.paths?.services, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.services ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.services}`, entityName) : path.resolve(process.cwd(), entityName);
 
     const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
 
@@ -746,10 +752,10 @@ function generateService(lowerCase, upperCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '${config?.paths?.stores?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
-        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('.', '@')}/${toKebabFromPascal(i)}'`
+        return `import { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
@@ -772,7 +778,7 @@ function generateService(lowerCase, upperCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.service.ts`), [
         "import { injectable, inject } from 'inversify'",
-        injections.length ? `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'` : undefined,
+        injections.length ? `import { DITokens } from '@${config?.paths?.di}'` : undefined,
         `import { ${lowerCase}ServiceMetadata } from './${entityName}.service.metadata'`,
         "import { Module } from '@alevnyacow/nzmt'",
         ...importInjections,
@@ -798,12 +804,12 @@ function generateService(lowerCase, upperCase) {
 
     // Update DI
 
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}Service } from '${config?.paths?.services.replace('.', '@')}/${entityName}'`
+        `import { ${upperCase}Service } from '@${config?.paths?.services}/${entityName}'`
     )
 
     insertAfterLineInFile(
@@ -820,7 +826,7 @@ if (command.toLowerCase() === 'service' || command === 'S') {
 }
 
 function generateController(upperCase, lowerCase) {
-    const folder = config?.paths?.controllers ? path.resolve(process.cwd(), config?.paths?.controllers, entityName) : path.resolve(process.cwd(), entityName);
+    const folder = config?.paths?.controllers ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.controllers}`, entityName) : path.resolve(process.cwd(), entityName);
 
     const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
 
@@ -830,14 +836,14 @@ function generateController(upperCase, lowerCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '${config?.paths?.stores?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
         if (i.endsWith('Service')) {
-            return `import { ${i} } from '${config?.paths?.services?.replace('.', '@')}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
+            return `import { ${i} } from '@${config?.paths?.services}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
         }
 
-        return `import { ${i} } from '${config?.paths?.infrastructure?.replace('.', '@')}/${toKebabFromPascal(i)}'`
+        return `import { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
@@ -860,7 +866,7 @@ function generateController(upperCase, lowerCase) {
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.ts`), [
         `import { Controller } from '@alevnyacow/nzmt'`,
         `import { injectable, inject } from 'inversify'`,
-        `import { DITokens } from '${config?.paths?.di?.replace('.', '@')}'`,
+        `import { DITokens } from '@${config?.paths?.di}'`,
         `import { ${lowerCase}ControllerMetadata } from './${entityName}.controller.metadata'`,
         ...importInjections,
         ``,
@@ -884,12 +890,12 @@ function generateController(upperCase, lowerCase) {
 
     // Update DI
 
-    const diEntriesPath = path.resolve(process.cwd(), config?.paths?.di, 'entries.di.ts')
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
 
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}Controller } from '${config?.paths?.controllers.replace('.', '@')}/${entityName}'`
+        `import { ${upperCase}Controller } from '@${config?.paths?.controllers}/${entityName}'`
     )
 
     insertAfterLineInFile(
