@@ -6,7 +6,7 @@
 
 # About
 
-NZMT is a scaffolding toolkit for building structured Next.js full-stack applications.
+NZMT is a toolkit for building structured Next.js full-stack applications.
 
 It combines dependency injection, Zod validation and a DDD-inspired architecture,
 while removing most of the boilerplate through code generation.
