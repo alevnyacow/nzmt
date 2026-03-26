@@ -393,7 +393,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     // Contract
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.store.ts`), [
-        "import type { Store } from '@alevnyacow/nzmt'",
+        "import { Store } from '@alevnyacow/nzmt'",
         withEntity ? `import { ${upperCase} } from '@${config?.paths?.entities}/${entityName}'` : undefined,
         "",
         `export const ${lowerCase}StoreMetadata = {`,
@@ -414,6 +414,8 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
         "",
         `\tname: '${upperCase}Store'`,
         "} satisfies Store.Metadata",
+        "",
+        `export const { schemas: ${lowerCase}StoreSchemas } = Store.toModuleMetadata(${lowerCase}Metadata)`,
         "",
         `export type ${upperCase}Store = Store.Contract<typeof ${lowerCase}StoreMetadata>`
     ].filter(x => typeof x === 'string').join('\n'))
@@ -752,10 +754,10 @@ function generateService(lowerCase, upperCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import type { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
-        return `import { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
+        return `import type { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
@@ -836,14 +838,14 @@ function generateController(upperCase, lowerCase) {
         }
 
         if (i.endsWith('Store')) {
-            return `import { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
+            return `import type { ${i} } from '@${config?.paths?.stores}/${toKebabFromPascal(i).slice(0, -'-store'.length)}'`
         }
 
         if (i.endsWith('Service')) {
-            return `import { ${i} } from '@${config?.paths?.services}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
+            return `import type { ${i} } from '@${config?.paths?.services}/${toKebabFromPascal(i).slice(0, -'-service'.length)}'`
         }
 
-        return `import { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
+        return `import type { ${i} } from '@${config?.paths?.infrastructure}/${toKebabFromPascal(i)}'`
     })
 
     fs.mkdirSync(folder, { recursive: true })
