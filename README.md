@@ -44,9 +44,11 @@ You can use `fromDI` method anywhere you need an instance of a controller or a s
 ```ts
 // app/api/shop/route.ts
 
-import { ShopController } from "@/server/controllers/shop"
+import type { ShopController } from "@/server/controllers/shop"
 import { fromDI } from "@/server/di"
 
+// 'ShopController' here is not just a string, you have an
+// intellisense across all injected modules.
 const controller = fromDI<ShopController>('ShopController')
 
 // Suppose you have implemented the list_GET method in the controller.
