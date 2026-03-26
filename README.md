@@ -24,16 +24,19 @@ Suppose you have NextJS application with generated Prisma client.
 npm install inversify zod reflect-metadata @alevnyacow/nzmt
 ```
 2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
+
 3. Initialize NZMT. This will set up all required infrastructure and configuration for you:
 ```bash
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
 ```
+
 4. Scaffold your first entity. Example for a `Product` with `title` and `price`:
 ```bash
 # Field syntax: f:<name>-<type>[.<zod-validators>]
 npx nzmt entity product f:title-string,price-int.positive
 ```
 This will generate the entity, its Zod schema and related types.
+
 5. Scaffold server boilerplate
 ```bash
 # product store (with Prisma implementation, RAM implementation and DI)
