@@ -95,7 +95,7 @@ function createDefaultConfig() {
         const withSrcFolder = folders.includes('src')
         const coreFolder = withSrcFolder ? './src' : '.'
         
-        const prismaClientPathOption = [entityName, ...options].find(x => x.startsWith('prismaClientPath:')) 
+        const prismaClientPathOption = [entityName, ...options].filter(x => typeof x === 'string').find(x => x.startsWith('prismaClientPath:')) 
 
         let prismaClientPath = prismaClientPathOption ? prismaClientPathOption.split(':')[1] : undefined
 
