@@ -98,7 +98,7 @@ export type Contract<
           }
         : {});
 
-const mapStoreSchemasToModuleMetadata = <
+export const toModuleMetadata = <
     Schemas extends {
         models: {
             list: unknown;
@@ -116,10 +116,10 @@ const mapStoreSchemasToModuleMetadata = <
             string,
             { payload: unknown; response: unknown }
         >;
+        name: string
     }
 >(
     schemas: Schemas,
-    name: string
 ) => {
     type ZodCRUDStoreSchemas<
         Schemas extends {
@@ -171,7 +171,7 @@ const mapStoreSchemasToModuleMetadata = <
     >;
 
     return {
-        name,
+        name: schemas.name,
         schemas: {
             ...(schemas.customOperations ?? {}),
             list: {
@@ -261,6 +261,7 @@ const mapStoreSchemasToModuleMetadata = <
 export const methods = <T extends Metadata>(
     schemas: T
 ) => {
-    const data = mapStoreSchemasToModuleMetadata(schemas, schemas.name);
+    const data = toModuleMetadata(schemas);
+
     return moduleMethods(data);
 };
