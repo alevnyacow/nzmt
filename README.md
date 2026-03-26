@@ -32,7 +32,7 @@ npx nzmt init prismaClientPath:@/app/generated/prisma/client
 
 4. Scaffold your first entity. Example for a `Product` with `title` and `price`:
 ```bash
-# Field syntax: f:<name>-<type>[.<zod-validators>]
+# Field syntax: f:<name>-<zod-rules>
 npx nzmt entity product f:title-string,price-int.positive
 ```
 This will generate the entity, its Zod schema and related types.
@@ -41,8 +41,8 @@ This will generate the entity, its Zod schema and related types.
 ```bash
 # product store (with Prisma implementation, RAM implementation and DI)
 npx nzmt store product
-# product service with injected product store (with DI)
-npx nzmt service product i:ProductStore
+# product service proxying all product store methods (with DI)
+npx nzmt service product p:ProductStore
 # shop controller with injected product service and logger (with DI)
 npx nzmt controller shop i:Logger,ProductService
 ```

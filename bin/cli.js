@@ -415,7 +415,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
         `\tname: '${upperCase}Store'`,
         "} satisfies Store.Metadata",
         "",
-        `export const { schemas: ${lowerCase}StoreSchemas } = Store.toModuleMetadata(${lowerCase}Metadata)`,
+        `export const { schemas: ${lowerCase}StoreSchemas } = Store.toModuleMetadata(${lowerCase}StoreMetadata)`,
         "",
         `export type ${upperCase}Store = Store.Contract<typeof ${lowerCase}StoreMetadata>`
     ].filter(x => typeof x === 'string').join('\n'))
@@ -746,7 +746,15 @@ function toKebabFromPascal(str) {
 function generateService(lowerCase, upperCase) {
     const folder = config?.paths?.services ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.services}`, entityName) : path.resolve(process.cwd(), entityName);
 
-    const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+    const proxiedStore = options.find(x => x.startsWith('p:'))?.split(':')?.at(-1)
+    if (proxiedStore && !proxiedStore.endsWith('Store')) {
+        throw 'Only stores can be proxied in services!'
+    }
+
+    let injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+    if (proxiedStore && !injections.includes(proxiedStore)) {
+        injections = injections.concat(proxiedStore)
+    }
 
     const importInjections = injections.map((i) => {
         if (i.endsWith('Service') || i.endsWith('Controller')) {
@@ -766,10 +774,11 @@ function generateService(lowerCase, upperCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.service.metadata.ts`), [
         "import type { Module } from '@alevnyacow/nzmt'",
+        proxiedStore ? `import { ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas } from '@${config?.paths?.stores}/${toKebabFromPascal(proxiedStore).slice(0, -'-store'.length)}'` : undefined,
         "",
         `export const ${lowerCase}ServiceMetadata = {`,
         `\tname: '${upperCase}Service',`,
-        "\tschemas: {}",
+        proxiedStore ? `\tschemas: { ...${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas }` : "\tschemas: {}",
         "} satisfies Module.Metadata",
         "",
         `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
@@ -793,6 +802,11 @@ function generateService(lowerCase, upperCase) {
         ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
         `\t) {}`,
         ``,
+        proxiedStore ? `\tgetList = this.methods('list', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.list)` : undefined,
+        proxiedStore ? `\tgetDetails = this.methods('details', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.details)` : undefined,
+        proxiedStore ? `\tcreate = this.methods('create', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.create)` : undefined,
+        proxiedStore ? `\tupdate = this.methods('updateOne', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.updateOne)` : undefined,
+        proxiedStore ? `\tdelete = this.methods('deleteOne', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.deleteOne)` : undefined,
         "}"
     ].filter(x => typeof x === 'string').join('\n'))
     
