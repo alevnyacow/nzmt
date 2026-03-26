@@ -300,7 +300,7 @@ function initPrisma() {
 
     fs.writeFileSync(path.resolve(prismaFolder, 'client.ts'), [
         `import { PrismaPg } from '@prisma/adapter-pg'`,
-        `import { PrismaClient } from '@${prismaClientPath}'`,
+        `import { PrismaClient } from '${prismaClientPath}'`,
         ``,
         `const adapter = new PrismaPg({`,
         `\tconnectionString: process.env.DATABASE_URL`,

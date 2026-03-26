@@ -6,38 +6,44 @@
 
 # About
 
-NZMT is an opinionated toolkit with scaffolding for building structured Next.js applications with DI, Zod validation, and DDD-inspired architecture — without boilerplate overhead.
+NZMT is a scaffolding toolkit for building structured Next.js full-stack applications.
 
-- 🧩 **End-to-end contracts and implementations** — generated or manually authored — across backend and client–server integration layers.
+It combines dependency injection, Zod validation and a DDD-inspired architecture,
+while removing most of the boilerplate through code generation.
+
+- 🧩 Generate entities, stores, services and controllers boilerplate **with simple CLI commands**.
 - 🔐 **Runtime safety** across server layers with Zod out of the box.
 - ⚡ **Dependency Injection** powered by Inversify with no setup required.
-- 🚀 Comes with **scaffolding system** to generate and organize application structure via CLI.
 
-# Quick start (example with Prisma) 
+# Quick start with Prisma 
 
-1. Generate Prisma client.
-2. Install required peer dependencies (`inversify`, `zod`, `reflect-metadata`).
-2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
-3. Run the following:
+Suppose you have NextJS application with generated Prisma client.
 
+1. Install required peer dependencies and the toolkit itself.
 ```bash
-# scaffolder initialization with Prisma (must be done once)
-npx nzmt init prismaClientPath:./app/generated/prisma/client
-
-# product entity with title and price fields
+npm install inversify zod reflect-metadata @alevnyacow/nzmt
+```
+2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
+3. Initialize NZMT. This will set up all required infrastructure and configuration for you:
+```bash
+npx nzmt init prismaClientPath:@/app/generated/prisma/client
+```
+4. Scaffold your first entity. Example for a `Product` with `title` and `price`:
+```bash
+# Field syntax: f:<name>-<type>[.<zod-validators>]
 npx nzmt entity product f:title-string,price-int.positive
-
+```
+This will generate the entity, its Zod schema and related types.
+5. Scaffold server boilerplate
+```bash
 # product store (with Prisma implementation, RAM implementation and DI)
 npx nzmt store product
-
 # product service with injected product store (with DI)
 npx nzmt service product i:ProductStore
-
 # shop controller with injected product service and logger (with DI)
 npx nzmt controller shop i:Logger,ProductService
 ```
-
-The entire structure and infrastructure have been generated. All that remains is developing the contracts and the logic. The organization and content of the generated files are clear, and they’re easy to understand.
+Now you have scaffolded structure for `ProductStore`, `ProductService` and `ShopController` and all of them are registered in the DI container. You can now implement your logic inside these modules and expose it via controllers.
 
 You can use `fromDI` method anywhere you need an instance of a controller or a service:
 
@@ -47,8 +53,8 @@ You can use `fromDI` method anywhere you need an instance of a controller or a s
 import type { ShopController } from "@/server/controllers/shop"
 import { fromDI } from "@/server/di"
 
-// 'ShopController' here is not just a string, you have an
-// intellisense across all injected modules.
+// The key is fully typed, so you get autocomplete
+// across all registered DI modules.
 const controller = fromDI<ShopController>('ShopController')
 
 // Suppose you have implemented the list_GET method in the controller.
@@ -77,7 +83,7 @@ Server-side logic is structured into four core modules: *Stores*, *Services*, *C
 
 There are also two building blocks shared across server and client: Entities and Value Objects.
 
-- **Entities** represent domain objects used throughout the application. They contain no Data Layer logic and are not responsible for business use-case logic, but may include pure domain logic, contracts, and invariants (e.g. User, Product).
+- **Entities** represent domain objects used throughout the application. They don’t include data access or business flow logic, but may contain pure domain logic, contracts and invariants (e.g. User, Product).
 - **Value Objects** define reusable, strongly-typed invariants for meaningful concepts such as Pagination or Identifier.
 
 # Scaffolding
@@ -85,7 +91,7 @@ There are also two building blocks shared across server and client: Entities and
 ## Setup
 
 ```
-npx nzmt init prismaClientPath:@prisma/client
+npx nzmt init prismaClientPath:@/app/generated/prisma/client
 ```
 This creates `nzmt.config.json`, sets up DI and testing, and adds base providers. `prismaClientPath:...` parameter is optional and enables Prisma scaffolding.
 
