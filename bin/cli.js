@@ -111,6 +111,7 @@ function createDefaultConfig() {
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
                 queries: '/client/shared/queries',
+                clientUtils: '/client/shared/utils'
             },
             store: {
                 prisma: {
@@ -129,6 +130,7 @@ function createDefaultConfig() {
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
                 queries: '/client/shared/queries',
+                clientUtils: '/client/shared/utils'
             }
         }, null, '\t'))
     }
@@ -289,6 +291,27 @@ function initDI() {
     ].join('\n'))
 };
 
+function initClientUtils() {
+    const config = loadConfig()
+    const root = findProjectRoot()
+    const folder = path.resolve(root, `${config.coreFolder}${config.paths.clientUtils}`)
+    fs.mkdirSync(folder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(folder, 'api-request.ts'), [
+        "export const apiRequest = (url: string, method: 'GET' | 'POST' | 'DELETE' | 'PATCH' | 'PUT') =>",
+        "\tasync (payload: { body?: Object; query?: Object }) => {",
+        "\t\tconst query = payload?.query ? '?' + new URLSearchParams(Object.entries(payload.query).filter(([, v]) => v != null && v !== '')) : ''",
+        "\t\tconst res = await fetch(url + query, { method, headers: { 'Content-Type': 'application/json' }, body: payload?.body && JSON.stringify(payload.body) })",
+        "\t\tif (!res.ok) throw await res.json()",
+        "\t\treturn res.json()",
+        "\t}"
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, 'index.ts'), [
+        `export * from './api-request'`
+    ].join('\n'))
+}
+
 function initPrisma() {
     const config = loadConfig()
     const prismaClientPath = config?.store?.prisma?.clientPath
@@ -377,6 +400,7 @@ function initLogger() {
 if (command.toLowerCase() === 'init' || command === 'i') {
     createDefaultConfig()
     initDI()
+    initClientUtils()
     initPrisma()
     initLogger()
 
@@ -1030,11 +1054,120 @@ function generateAPIRoutes(lowerCase, upperCase) {
     }   
 }
 
+function generateQueries(lowerCase, upperCase) {
+    const projectRoot = findProjectRoot()
+
+    const fileText = fs.readFileSync(
+        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, entityName, `${entityName}.controller.ts`),
+        'utf-8'
+    )
+
+    const regex = /^\s*(\w+)\s*=\s*this\.endpoints/mg
+    const methods = Array.from(fileText.matchAll(regex), m => m[1])
+
+    const methodInfo = methods.map(method => ({method: method.split('_').pop(), path: method.split('_').slice(0, -1).join('/')}))
+
+    const rootMethods = methodInfo.filter(x => !x.path.length).map(x => x.method)
+    const nestedMethods = methodInfo.filter(x => !!x.path.length).reduce((acc, cur) => {
+        if (!acc[cur.path]) {
+            acc[cur.path] = []
+        }
+        acc[cur.path].push(cur.method)
+        return acc
+    }, {})
+
+    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}-controller`)
+    
+    fs.mkdirSync(controllerQueriesPath, { recursive: true })
+
+    for (const rootMethod of rootMethods) {
+        if (!rootMethod) {
+            continue
+        }
+        const fileName = path.resolve(controllerQueriesPath, `${rootMethod}.ts` )
+        const alreadyExists = fs.existsSync(fileName)
+        if (alreadyExists) {
+            continue
+        }
+        fs.writeFileSync(fileName, [
+            `import { ${rootMethod === 'GET' ? 'useQuery' : 'useMutation'} } from '@tanstack/react-query'`,
+            `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
+            `import { apiRequest } from '@${config.paths.clientUtils}'`,
+            '',
+            `type Method = ${upperCase}API['endpoints']['${rootMethod}']`,
+            ``,
+            `const endpoint = '/api/${entityName}-controller'`,
+            ``,
+            rootMethod === 'GET' 
+                ? [
+                    `export const use${upperCase}Controller_${rootMethod} = (payload: Method['payload']) => {`,
+                    `\treturn useQuery<Method['response'], Method['error']>({`,
+                    `\t\tqueryKey: [endpoint, payload],`,
+                    `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
+                    `\t})`,
+                    `}`
+                ].join('\n') 
+                : [
+                    `export const use${upperCase}Controller_${rootMethod} = () => {`,
+                    `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
+                    `\t\tmutationFn: apiRequest(endpoint, '${rootMethod}')`,
+                    `\t})`,
+                    `}`
+                ].join('\n')
+        ].join('\n'))
+    }
+
+    for (const [currentPath, methods] of Object.entries(nestedMethods)) {
+        for (const method of methods) {
+            const fullMethodName = `${currentPath.replaceAll('/', '_')}_${method}`
+            const fileName = path.resolve(controllerQueriesPath, `${fullMethodName}.ts`)
+            const alreadyExists = fs.existsSync(fileName)
+            if (alreadyExists) {
+                continue
+            }
+            fs.writeFileSync(fileName, [
+                `import { ${method === 'GET' ? 'useQuery' : 'useMutation'} } from '@tanstack/react-query'`,
+                `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
+                `import { apiRequest } from '@${config.paths.clientUtils}'`,
+                '',
+                `type Method = ${upperCase}API['endpoints']['${fullMethodName}']`,
+                ``,
+                `const endpoint = '/api/${entityName}-controller/${currentPath}'`,
+                ``,
+                method === 'GET' 
+                    ? [
+                        `export const use${upperCase}Controller_${fullMethodName} = (payload: Method['payload']) => {`,
+                        `\treturn useQuery<Method['response'], Method['error']>({`,
+                        `\t\tqueryKey: [endpoint, payload],`,
+                        `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
+                        `\t})`,
+                        `}`
+                    ].join('\n') 
+                    : [
+                        `export const use${upperCase}Controller_${fullMethodName} = () => {`,
+                        `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
+                        `\t\tmutationFn: apiRequest(endpoint, '${method}')`,
+                        `\t})`,
+                        `}`
+                    ].join('\n')
+            ].join('\n'))
+
+        }
+    }   
+}
+
 
 if (command === 'api-routes') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
 
     generateAPIRoutes(lowerCase, upperCase)
+}
+
+if (command === 'queries') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+
+    generateQueries(lowerCase, upperCase)
+
 }
 
 if (command.toLowerCase() === 'controller' || command === 'c') {
@@ -1065,5 +1198,6 @@ if (command.toLowerCase() === 'crud-api') {
     generateService(lowerCase, upperCase, upperCase + 'Store')
     generateController(upperCase, lowerCase, upperCase + 'Service')
     generateAPIRoutes(lowerCase, upperCase)
+    generateQueries(lowerCase, upperCase)
     process.exit(0)
 }
