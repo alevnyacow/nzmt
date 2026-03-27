@@ -849,10 +849,19 @@ if (command.toLowerCase() === 'service' || command === 'S') {
     process.exit(0)
 }
 
-function generateController(upperCase, lowerCase) {
+function generateController(upperCase, lowerCase, crudService) {
+    if (crudService && !crudService.endsWith('Service')) {
+        throw 'Incorrect crudService'
+    }
+
     const folder = config?.paths?.controllers ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.controllers}`, entityName) : path.resolve(process.cwd(), entityName);
 
-    const injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+    let injections = options.filter(x => x.startsWith('i:')).flatMap(x => x.split(':')[1]).join(',').split(',').filter(x => !!x.length)
+    if (crudService && !injections.includes(crudService)) {
+        injections = injections.concat(crudService)
+    }
+
+    const crudServiceLowercase = crudService ? crudService.substring(0, 1).toUpperCase() + crudService.substring(1) : undefined
 
     const importInjections = injections.map((i) => {
         if (i.endsWith('Controller')) {
@@ -876,10 +885,37 @@ function generateController(upperCase, lowerCase) {
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.metadata.ts`), [
         `import { Controller } from '@alevnyacow/nzmt'`,
+        crudService ? `import { ${crudServiceLowercase}Metadata } from '@${config.paths.services}/${toKebabFromPascal(crudService).slice(0, -'-service'.length)}'` : undefined
         ``,
         `export const ${lowerCase}ControllerMetadata = {`,
         `\tname: '${upperCase}Controller',`,
-        `\tschemas: {}`,
+        crudService ? [
+            `\tschemas: {`,
+            `\t\tGET: {`,
+            `\t\t\tquery: z.union([`,
+            `\t\t\t\tValueObjects.Pagination.schema.extend(${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter.shape),`
+            `\t\t\t\t${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter`,
+            `\t\t\t])`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getList.response`,
+            `\t\t},`,
+            `\t\tdetails_GET: {`,
+            `\t\t\tquery: ${crudServiceLowercase}Metadata.schemas.getDetails.payload,`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getDetails.response`,
+            `\t\t},`,
+            `\t\tPOST: {`,
+            `\t\t\tbody: ${crudServiceLowercase}Metadata.schemas.create.payload,`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.create.response`,
+            `\t\t},`,
+            `\t\tPATCH: {`,
+            `\t\t\tbody: ${crudServiceLowercase}Metadata.schemas.update.payload,`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.update.response`,
+            `\t\t},`,
+            `\t\tDELETE: {`,
+            `\t\t\tquery: ${crudServiceLowercase}Metadata.schemas.delete.payload,`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.delete.response`,
+            `\t\t},`,
+            `\t}`,
+        ].join('\n') : `\tschemas: {}`,
         `} satisfies Controller.Metadata`,
         ``,
         `export type ${upperCase}API = Controller.Contract<typeof ${lowerCase}ControllerMetadata>`
@@ -902,6 +938,19 @@ function generateController(upperCase, lowerCase) {
         ``,
         `\tprivate readonly endpoints = Controller.endpoints(${lowerCase}ControllerMetadata)`,
         ``,
+        crudService ? [
+            `\tGET = this.endpoints('GET', async (x) => {`,
+            `\t\tif ('pageSize' in x && 'zeroBasedIndex' in x) {`,
+            `\t\t\tconst { pageSize, zeroBasedIndex, ...filter } = x`,
+            `\t\t\treturn await this.${crudServiceLowercase}.getList({ filter, pagination: { pageSize, zeroBasedIndex } })`,
+            `\t\t}`,
+            `\t\treturn await this.${crudServiceLowercase}.getList({ filter: x })`,
+            ``,
+            `\tdetails_GET = this.endpoints('details_GET', this.${crudServiceLowercase}.getDetails)`,
+            `\tPOST = this.endpoints('POST', this.${crudServiceLowercase}.create)`,
+            `\tPATCH = this.endpoints('PATCH', this.${crudServiceLowercase}.update)`,
+            `\tDELETE = this.endpoints('DELETE', this.${crudServiceLowercase}.delete)`,
+        ].join('\n') : undefined
         `}`
     ].filter(x => typeof x === 'string').join('\n'))
 
@@ -947,4 +996,14 @@ if (command.toLowerCase() === 'crud-service') {
     generateEntity(upperCase)
     generateStores(lowerCase, upperCase, true)
     generateService(lowerCase, upperCase, upperCase + 'Store')
+    process.exit(0)
+}
+
+if (command.toLowerCase() === 'crud-api') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateEntity(upperCase)
+    generateStores(lowerCase, upperCase, true)
+    generateService(lowerCase, upperCase, upperCase + 'Store')
+    generateController(upperCase, lowerCase, upperCase + 'Service')
+    process.exit(0)
 }
