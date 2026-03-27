@@ -9,59 +9,76 @@
 NZMT is a toolkit for building structured Next.js full-stack applications.
 
 It combines dependency injection, Zod validation and a DDD-inspired architecture,
-while removing most of the boilerplate through code generation.
+while removing most of the boilerplate through code generation out of the box.
 
-- 🧩 Generate entities, stores, services and controllers boilerplate **with simple CLI commands**.
-- 🔐 **Runtime safety** across server layers with Zod out of the box.
-- ⚡ **Dependency Injection** powered by Inversify with no setup required.
+Batteries included!
+
+## Why NZMT?
+
+- You want to focus on domain logic without full DDD complexity
+- You’re tired of rewriting CRUD, data layer logic, DTOs, and validation
+- You want to follow best practices without overengineering or repetitive boilerplate
+- You want your application to be runtime-safe
+- You want to move fast without losing predictability
+- You want a backend that can evolve into a full-stack solution
+
+You focus on business logic; NZMT handles the infrastructure.
 
 # Quick start with Prisma 
 
-Suppose you have NextJS application with generated Prisma client.
+Assuming you have a Next.js project with a generated Prisma client and a `User` Prisma model:
 
 1. Install required peer dependencies and the toolkit itself.
 ```bash
 npm install inversify zod reflect-metadata @alevnyacow/nzmt
 ```
+
 2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
 
 3. Initialize NZMT. This will set up all required infrastructure and configuration for you:
 ```bash
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
 ```
 
-4. Scaffold your first entity. Example for a `Product` with `title` and `price`:
+4. Now you can scaffold everything you need for `User` entity CRUD API in one CLI command:
 ```bash
-# Field syntax: f:<name>-<zod-rules>
-npx nzmt entity product f:title-string,price-int.positive
+npx nzmt crud-api user
 ```
-This will generate the entity, its Zod schema and related types.
 
-5. Scaffold server boilerplate
-```bash
-# product store (with Prisma implementation, RAM implementation and DI)
-npx nzmt store product
-# product service proxying all product store methods (with DI)
-npx nzmt service product p:ProductStore
-# shop controller with injected product service and logger (with DI)
-npx nzmt controller shop i:Logger,ProductService
-```
-Now you have scaffolded structure for `ProductStore`, `ProductService` and `ShopController` and all of them are registered in the DI container. You can now implement your logic inside these modules and expose it via controllers.
+This will generate:
 
-You can use `fromDI` method anywhere you need an instance of a controller or a service:
+- `User` entity
+- `UserStore` contract, `UserRAMStore` and `UserPrismaStore` implementation
+- `UserService` proxying all `UserStore` methods
+- `UserController` proxying all `UserService` methods. 
+
+All code is editable - you stay in full control.
+
+5. **Describe entity properties and validation rules using Zod** for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
+
+6. **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
+All methods and contracts are already scaffolded; you only need to describe the mappers themselves.
+
+7. Use generated controller in `app/api/user/route.ts` file via DI.
 
 ```ts
-// app/api/shop/route.ts
-
-import type { ShopController } from "@/server/controllers/shop"
+import type { UserController } from "@/server/controllers/user"
 import { fromDI } from "@/server/di"
 
-// The key is fully typed, so you get autocomplete
-// across all registered DI modules.
-const controller = fromDI<ShopController>('ShopController')
-
-// Suppose you have implemented the list_GET method in the controller.
-export const GET = controller.list_GET
+// Get a fully typed controller instance from the DI container.
+// Key is fully typed too, of course.
+const controller = fromDI<UserController>('UserController')
+// Use controller method as a route method.
+export const GET = controller.GET
 ```
 
 # Design principles
