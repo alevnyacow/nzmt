@@ -6,35 +6,32 @@
 
 # About
 
-NZMT is a combination of a convenient library for building application modules validated with Zod schemas and a powerful scaffolding tool.
+**Not** a framework. Seriously, we have enough of those. NZMT is just the tools you always wanted in Next.js, plus a scaffolder that spins up server logic and client queries. Full-stack, the Next.js way!
 
-It combines dependency injection, Zod validation and a DDD-inspired architecture,
-while removing most of the boilerplate through code generation out of the box.
+Think: dependency injection + Zod validation + DDD vibes... but without drowning in boilerplate. You write the fun stuff; NZMT handles the boring stuff.
 
-Batteries included!
+Batteries included.
 
 ## Why NZMT?
 
-- You want to focus on domain logic without full DDD complexity
-- You’re tired of rewriting CRUD, data layer logic, DTOs, and validation
-- You want to follow best practices without overengineering or repetitive boilerplate
-- You want your application to be runtime-safe
-- You don't want to waste time on another framework, you want to keep using plain Next.js, but with better structure and speed
-- You want a backend that can evolve into a full-stack solution
-- You dig cool cartoonish fonts in logos and you don't see it this much nowadays
+- Focus on your domain logic without drowning in full-blown DDD.
+- Keep using plain Next.js, just faster and cleaner — no extra framework required.
+- Watch entities, stores, services, controllers, handlers, and client-side queries appear automatically (and yes, it’s actually fun).
 
-You focus on business logic; NZMT handles the infrastructure.
+# Quick start (Prisma + client-side queries)
 
-# Quick start with Prisma 
+Assuming you have a Next.js project with a generated Prisma client, `User` Prisma model and configured `@tanstack/react-query`:
 
-Assuming you have a Next.js project with a generated Prisma client and a `User` Prisma model:
+## Initialization
 
-1. Install required peer dependencies and the toolkit itself.
+1. Install required dependencies and NZMT itself:
+
 ```bash
 npm install inversify zod reflect-metadata @alevnyacow/nzmt
 ```
 
 2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
+
 ```json
 {
   "compilerOptions": {
@@ -45,11 +42,15 @@ npm install inversify zod reflect-metadata @alevnyacow/nzmt
 ```
 
 3. Initialize NZMT (must be done once). This will set up all required infrastructure and configuration for you:
+
 ```bash
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
 ```
 
-4. Now you can scaffold everything you need for `User` entity CRUD API in one CLI command:
+## Scaffolding
+
+Now you can scaffold everything you need for `User` entity CRUD API in one CLI command:
+
 ```bash
 npx nzmt crud-api user
 ```
@@ -62,12 +63,13 @@ This will generate:
 - `UserController` with ready-to-use API endpoints
 - Fully typed `UserAPI` contract (endpoints + DTOs) for client usage
 - API `route handlers` inside your `app` folder
+- `React queries`. Fully typed and ready to be used in your client-side code!
 
-All code is editable - you stay in full control.
+**All code is editable - you stay in full control!**
 
-5. **Describe entity properties and validation rules using Zod** for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
+- **Describe entity properties and validation rules using Zod** for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
 
-6. **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
+- **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
 All methods and contracts are already scaffolded; you only need to describe the mappers themselves. RAM store implementation works out of the box.
 
 # Design principles
