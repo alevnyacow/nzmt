@@ -67,9 +67,11 @@ This will generate:
 
 **All code is editable - you stay in full control!**
 
-- **Describe entity properties and validation rules using Zod** for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
+So, only two things left to do:
 
-- **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
+- Describe entity properties and validation rules using Zod for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
+
+- Implement Prisma mappers in `/server/stores/user/user.store.prisma.ts`.  
 All methods and contracts are already scaffolded; you only need to describe the mappers themselves. RAM store implementation works out of the box.
 
 # Design principles
