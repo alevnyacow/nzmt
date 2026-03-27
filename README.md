@@ -36,7 +36,6 @@ npm install inversify zod reflect-metadata @alevnyacow/nzmt
 
 2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
 ```json
-// tsconfig.json
 {
   "compilerOptions": {
     "experimentalDecorators": true,
@@ -45,7 +44,7 @@ npm install inversify zod reflect-metadata @alevnyacow/nzmt
 }
 ```
 
-3. Initialize NZMT. This will set up all required infrastructure and configuration for you:
+3. Initialize NZMT (must be done once). This will set up all required infrastructure and configuration for you:
 ```bash
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
 ```
@@ -58,7 +57,7 @@ npx nzmt crud-api user
 This will generate:
 
 - `User` entity
-- `UserStore` contract, `UserRAMStore` and `UserPrismaStore` implementation
+- `UserStore` contract, `UserRAMStore` and `UserPrismaStore` implementations
 - `UserService` proxying all `UserStore` methods
 - `UserController` proxying all `UserService` methods. 
 
@@ -67,7 +66,7 @@ All code is editable - you stay in full control.
 5. **Describe entity properties and validation rules using Zod** for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
 
 6. **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
-All methods and contracts are already scaffolded; you only need to describe the mappers themselves.
+All methods and contracts are already scaffolded; you only need to describe the mappers themselves. RAM store implementation works out of the box.
 
 7. Use generated controller in `app/api/user/route.ts` file via DI.
 
