@@ -21,6 +21,7 @@ Batteries included!
 - You want your application to be runtime-safe
 - You want to move fast without losing predictability
 - You want a backend that can evolve into a full-stack solution
+- You dig cool cartoonish fonts in logos
 
 You focus on business logic; NZMT handles the infrastructure.
 
