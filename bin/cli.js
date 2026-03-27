@@ -861,7 +861,7 @@ function generateController(upperCase, lowerCase, crudService) {
         injections = injections.concat(crudService)
     }
 
-    const crudServiceLowercase = crudService ? crudService.substring(0, 1).toUpperCase() + crudService.substring(1) : undefined
+    const crudServiceLowercase = crudService ? crudService.substring(0, 1).toLowerCase() + crudService.substring(1) : undefined
 
     const importInjections = injections.map((i) => {
         if (i.endsWith('Controller')) {
@@ -893,7 +893,7 @@ function generateController(upperCase, lowerCase, crudService) {
             `\tschemas: {`,
             `\t\tGET: {`,
             `\t\t\tquery: z.union([`,
-            `\t\t\t\tValueObjects.Pagination.schema.extend(${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter.shape),`
+            `\t\t\t\tValueObjects.Pagination.schema.extend(${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter.shape),`,
             `\t\t\t\t${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter`,
             `\t\t\t])`,
             `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getList.response`,
@@ -945,12 +945,12 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\t\treturn await this.${crudServiceLowercase}.getList({ filter, pagination: { pageSize, zeroBasedIndex } })`,
             `\t\t}`,
             `\t\treturn await this.${crudServiceLowercase}.getList({ filter: x })`,
-            ``,
+            `\t}`,
             `\tdetails_GET = this.endpoints('details_GET', this.${crudServiceLowercase}.getDetails)`,
             `\tPOST = this.endpoints('POST', this.${crudServiceLowercase}.create)`,
             `\tPATCH = this.endpoints('PATCH', this.${crudServiceLowercase}.update)`,
             `\tDELETE = this.endpoints('DELETE', this.${crudServiceLowercase}.delete)`,
-        ].join('\n') : undefined
+        ].join('\n') : undefined,
         `}`
     ].filter(x => typeof x === 'string').join('\n'))
 
