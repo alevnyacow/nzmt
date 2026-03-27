@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import z, { ZodType, type ZodObject } from 'zod';
+import z, { type ZodType, type ZodObject, type ZodUnion } from 'zod';
 import {
     type ControllerErrorModel,
     type ErrorBaseCreatingPayload,
@@ -16,8 +16,8 @@ type SuccessResponse<ResponseZodSchema> = ResponseZodSchema extends undefined
     : z.infer<ResponseZodSchema>;
 
 type ZodAPISchemas = {
-    body?: ZodObject;
-    query?: ZodObject;
+    body?: ZodObject | ZodUnion<[ZodObject<any>, ...ZodObject<any>[]]>;
+    query?: ZodObject | ZodUnion<[ZodObject<any>, ...ZodObject<any>[]]>;
     response?: ZodType;
 };
 
@@ -45,8 +45,8 @@ export type OnErrorHandler = (request: {
 
 type EndpointLogic<T extends ZodAPISchemas> = {
     handler: (
-        payload: (T['query'] extends ZodObject ? z.infer<T['query']> : {}) &
-            (T['body'] extends ZodObject ? z.infer<T['body']> : {}),
+        payload: (T['query'] extends ZodType ? z.infer<T['query']> : {}) &
+            (T['body'] extends ZodType ? z.infer<T['body']> : {}),
         request: {
             request: NextRequest;
             flags: Record<string, boolean>;
@@ -61,12 +61,12 @@ type EndpointLogic<T extends ZodAPISchemas> = {
     eventHandlers?: {
         onSuccess?: Array<
             (data: {
-                requestPayload: (T['query'] extends ZodObject
+                requestPayload: (T['query'] extends ZodType
                     ? z.infer<T['query']>
                     : {}) &
-                    (T['body'] extends ZodObject ? z.infer<T['body']> : {});
+                    (T['body'] extends ZodType ? z.infer<T['body']> : {});
                 request: NextRequest;
-                result: T['response'] extends ZodObject
+                result: T['response'] extends ZodType
                     ? z.infer<T['response']>
                     : undefined;
                 flags: Record<string, boolean>;
