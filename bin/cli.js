@@ -884,7 +884,8 @@ function generateController(upperCase, lowerCase, crudService) {
     // Metadata
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.metadata.ts`), [
-        `import { Controller } from '@alevnyacow/nzmt'`,
+        crudService ? `import z from 'zod'` : undefined,
+        `import { Controller, ValueObjects } from '@alevnyacow/nzmt'`,
         crudService ? `import { ${crudServiceLowercase}Metadata } from '@${config.paths.services}/${toKebabFromPascal(crudService).slice(0, -'-service'.length)}'` : undefined
         ``,
         `export const ${lowerCase}ControllerMetadata = {`,
@@ -895,7 +896,7 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\t\tquery: z.union([`,
             `\t\t\t\tValueObjects.Pagination.schema.extend(${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter.shape),`,
             `\t\t\t\t${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter`,
-            `\t\t\t])`,
+            `\t\t\t]),`,
             `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getList.response`,
             `\t\t},`,
             `\t\tdetails_GET: {`,
@@ -945,7 +946,8 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\t\treturn await this.${crudServiceLowercase}.getList({ filter, pagination: { pageSize, zeroBasedIndex } })`,
             `\t\t}`,
             `\t\treturn await this.${crudServiceLowercase}.getList({ filter: x })`,
-            `\t}`,
+            `\t})`,
+            ``,
             `\tdetails_GET = this.endpoints('details_GET', this.${crudServiceLowercase}.getDetails)`,
             `\tPOST = this.endpoints('POST', this.${crudServiceLowercase}.create)`,
             `\tPATCH = this.endpoints('PATCH', this.${crudServiceLowercase}.update)`,
