@@ -778,7 +778,15 @@ function generateService(lowerCase, upperCase) {
         "",
         `export const ${lowerCase}ServiceMetadata = {`,
         `\tname: '${upperCase}Service',`,
-        proxiedStore ? `\tschemas: { ...${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas }` : "\tschemas: {}",
+        proxiedStore ? [
+            `\tschemas: {`,
+            `\t\tgetList: ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas.list,`,
+            `\t\tgetDetails: ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas.details,`,
+            `\t\tcreate: ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas.create,`,
+            `\t\tupdate: ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas.updateOne,`,
+            `\t\tdelete: ${proxiedStore.substring(0, 1).toLowerCase() + proxiedStore.substring(1)}Schemas.deleteOne,`,
+            `\t}`,
+        ].join('\n') : "\tschemas: {}",
         "} satisfies Module.Metadata",
         "",
         `export type ${upperCase}ServiceDTOs = Module.DTOs<typeof ${lowerCase}ServiceMetadata>`
@@ -802,11 +810,11 @@ function generateService(lowerCase, upperCase) {
         ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
         `\t) {}`,
         ``,
-        proxiedStore ? `\tgetList = this.methods('list', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.list)` : undefined,
-        proxiedStore ? `\tgetDetails = this.methods('details', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.details)` : undefined,
+        proxiedStore ? `\tgetList = this.methods('getList', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.list)` : undefined,
+        proxiedStore ? `\tgetDetails = this.methods('getDetails', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.details)` : undefined,
         proxiedStore ? `\tcreate = this.methods('create', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.create)` : undefined,
-        proxiedStore ? `\tupdate = this.methods('updateOne', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.updateOne)` : undefined,
-        proxiedStore ? `\tdelete = this.methods('deleteOne', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.deleteOne)` : undefined,
+        proxiedStore ? `\tupdate = this.methods('update', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.updateOne)` : undefined,
+        proxiedStore ? `\tdelete = this.methods('delete', this.${proxiedStore.charAt(0).toLowerCase() + proxiedStore.slice(1)}.deleteOne)` : undefined,
         "}"
     ].filter(x => typeof x === 'string').join('\n'))
     
