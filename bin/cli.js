@@ -388,7 +388,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
     fs.mkdirSync(folder, { recursive: true })
 
-    const withEntity = withEntityPreset || !(options ?? []).includes('dont-import-entity')
+    const withEntity = withEntityPreset || (options ?? []).includes('import-entity')
 
     // Contract
 
@@ -743,10 +743,10 @@ function toKebabFromPascal(str) {
     .toLowerCase()
 }
 
-function generateService(lowerCase, upperCase) {
+function generateService(lowerCase, upperCase, store) {
     const folder = config?.paths?.services ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.services}`, entityName) : path.resolve(process.cwd(), entityName);
 
-    const proxiedStore = options.find(x => x.startsWith('p:'))?.split(':')?.at(-1)
+    const proxiedStore = store || options.find(x => x.startsWith('p:'))?.split(':')?.at(-1)
     if (proxiedStore && !proxiedStore.endsWith('Store')) {
         throw 'Only stores can be proxied in services!'
     }
@@ -933,4 +933,18 @@ if (command.toLowerCase() === 'controller' || command === 'c') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateController(upperCase, lowerCase)
     process.exit(0)
+}
+
+if (command.toLowerCase() === 'stored-entity' || command === 'se') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateEntity(upperCase)
+    generateStores(lowerCase, upperCase, true)
+    process.exit(0)
+}
+
+if (command.toLowerCase() === 'crud-service') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateEntity(upperCase)
+    generateStores(lowerCase, upperCase, true)
+    generateService(lowerCase, upperCase, upperCase + 'Store')
 }
