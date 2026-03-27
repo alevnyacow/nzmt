@@ -59,7 +59,8 @@ This will generate:
 - `User` entity
 - `UserStore` contract, `UserRAMStore` and `UserPrismaStore` implementations
 - `UserService` proxying all `UserStore` methods
-- `UserController` proxying all `UserService` methods. 
+- `UserController` proxying all `UserService` methods 
+- API `route handlers` can be used from client 
 
 All code is editable - you stay in full control.
 
@@ -67,19 +68,6 @@ All code is editable - you stay in full control.
 
 6. **Implement Prisma mappers** in `/server/stores/user/user.store.prisma.ts`.  
 All methods and contracts are already scaffolded; you only need to describe the mappers themselves. RAM store implementation works out of the box.
-
-7. Use generated controller in `app/api/user/route.ts` file via DI.
-
-```ts
-import type { UserController } from "@/server/controllers/user"
-import { fromDI } from "@/server/di"
-
-// Get a fully typed controller instance from the DI container.
-// Key is fully typed too, of course.
-const controller = fromDI<UserController>('UserController')
-// Use controller method as a route method.
-export const GET = controller.GET
-```
 
 # Design principles
 
@@ -106,63 +94,6 @@ There are also two building blocks shared across server and client: Entities and
 - **Entities** represent domain objects used throughout the application. They don’t include data access or business flow logic, but may contain pure domain logic, contracts and invariants (e.g. User, Product).
 - **Value Objects** define reusable, strongly-typed invariants for meaningful concepts such as Pagination or Identifier.
 
-# Scaffolding
-
-## Setup
-
-```
-npx nzmt init prismaClientPath:@/app/generated/prisma/client
-```
-This creates `nzmt.config.json`, sets up DI and testing, and adds base providers. `prismaClientPath:...` parameter is optional and enables Prisma scaffolding.
-
-## Naming conventions
-
-- The entity name is expected to be **in `kebab-case`** (e.g. `awesome-user`, `product`).
-- The entity name is expected to be **in singular form** (e.g. `product` instead of `products`).
-
-## Shared layer modules
-
-### Entities
-
-Example: scaffolding a `User` entity with two fields (name and age).
-
-```bash
-npx nzmt entity user f:name-string,age-int.positive
-```
-
-You can define entity fields using the `f:` flag. The format is `name-type`, where `type` maps to Zod (e.g. `int.positive` → `z.int().positive()`). This is optional — `npx nzmt entity user` will scaffold a `User` entity without additional fields.
-
-Entity scaffolder generates a dedicated folder with a barrel file and an entity implementation. Generated code is fully editable — you stay in control. 
-
-The generated `user.entity.ts` looks like this:
-
-```ts
-import z from 'zod'
-import { ValueObjects } from '@alevnyacow/nzmt'
-
-export type UserModel = z.infer<typeof User.schema>
-
-export class User {
-    static schema = z.object({
-        id: ValueObjects.Identifier.schema,
-        name: z.string(),
-        age: z.int().positive(),
-    })
-    
-    private constructor(private readonly data: UserModel) {}
-    
-    static create = (data: UserModel) => {
-        const parsedModel = User.schema.parse(data)
-        return new User(parsedModel)
-    }
-    
-    get model(): UserModel {
-        return this.data
-    }
-}
-```
-
-`User` entity, `User.schema` zod schema and `UserModel` type can be used wherever they are needed.
 
 # Package API
 

@@ -980,6 +980,63 @@ function generateController(upperCase, lowerCase, crudService) {
     )
 }
 
+function generateAPIRoutes(lowerCase, upperCase) {
+    const projectRoot = findProjectRoot()
+    const fileText = fs.readFileSync(
+        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, entityName, `${entityName}.controller.ts`),
+        'utf-8'
+    )
+
+    const regex = /^\s*(\w+)\s*=\s*this\.endpoints/mg
+    const methods = Array.from(fileText.matchAll(regex), m => m[1])
+
+    const methodInfo = methods.map(method => ({method: method.split('_').pop(), path: method.split('_').slice(0, -1).join('/')}))
+
+    const rootMethods = methodInfo.filter(x => !x.path.length).map(x => x.method)
+    const nestedMethods = methodInfo.filter(x => !!x.path.length).reduce((acc, cur) => {
+        if (!acc[cur.path]) {
+            acc[cur.path] = []
+        }
+        acc[cur.path].push(cur.method)
+        return acc
+    }, {})
+
+    const controllerHandlersRootPath = path.resolve(projectRoot, config.coreFolder, 'app', 'api', `${entityName}-controller`)
+    
+    fs.mkdirSync(controllerHandlersRootPath, { recursive: true })
+
+    if (rootMethods.length) {
+        fs.writeFileSync(path.resolve(controllerHandlersRootPath, 'route.ts'), [
+            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${entityName}'`,
+            `import { fromDI } from '@${config.paths.di}'`,
+            '',
+            `const controller = fromDI<${upperCase}Controller>('${upperCase}Controller')`,
+            '',
+            rootMethods.map(x => `export const ${x} = controller.${x}`).join('\n')
+        ].join('\n'))
+    }
+
+    for (const [currentPath, methods] of Object.entries(nestedMethods)) {
+        const nestedFolder = path.resolve(controllerHandlersRootPath, currentPath)
+        fs.mkdirSync(nestedFolder, { recursive: true })
+        fs.writeFileSync(path.resolve(nestedFolder, 'route.ts'), [
+            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${entityName}'`,
+            `import { fromDI } from '@${config.paths.di}'`,
+            '',
+            `const controller = fromDI<${upperCase}Controller>('${upperCase}Controller')`,
+            '',
+            methods.map(x => `export const ${x} = controller.${currentPath.replaceAll('/', '_')}_${x}`).join('\n')
+        ].join('\n'))
+    }   
+}
+
+
+if (command === 'api-routes') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+
+    generateAPIRoutes(lowerCase, upperCase)
+}
+
 if (command.toLowerCase() === 'controller' || command === 'c') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateController(upperCase, lowerCase)
@@ -1007,5 +1064,6 @@ if (command.toLowerCase() === 'crud-api') {
     generateStores(lowerCase, upperCase, true)
     generateService(lowerCase, upperCase, upperCase + 'Store')
     generateController(upperCase, lowerCase, upperCase + 'Service')
+    generateAPIRoutes(lowerCase, upperCase)
     process.exit(0)
 }
