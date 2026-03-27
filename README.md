@@ -57,10 +57,11 @@ npx nzmt crud-api user
 This will generate:
 
 - `User` entity
-- `UserStore` contract, `UserRAMStore` and `UserPrismaStore` implementations
-- `UserService` proxying all `UserStore` methods
-- `UserController` proxying all `UserService` methods 
-- API `route handlers` can be used from client 
+- `UserStore` contract with `RAM` and `Prisma` implementations
+- `UserService` with all business methods
+- `UserController` with ready-to-use API endpoints
+- Fully typed `UserAPI` contract (endpoints + DTOs) for client usage
+- API `route handlers` inside your `app` folder
 
 All code is editable - you stay in full control.
 
