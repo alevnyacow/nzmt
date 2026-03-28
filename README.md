@@ -39,7 +39,7 @@ npx nzmt init prismaClientPath:@/app/generated/prisma/client
 npx nzmt crud-api user
 ```
 
-Let's break down what's been scaffolded.
+Let's break down what's been scaffolded after `npx nzmt crud-api user` command:
 
 ### 1. Scaffolded `UserEntity`
 
