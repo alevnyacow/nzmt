@@ -100,9 +100,7 @@ export const userStoreMetadata = {
 	name: 'UserStore'
 } satisfies Store.Metadata
 
-export const { schemas: userStoreSchemas } = Store.toModuleMetadata(userStoreMetadata)
-
-export type UserStore = Store.Contract<typeof userStoreMetadata>
+...scaffolded code
 ```
 
 Contracts are pretty self-explainatory, but let's break this down anyway.
@@ -129,13 +127,7 @@ Second file is a `Prisma` implementation:
 ```ts
 /** /server/stores/users/user.store.prisma */
 
-import type { Prisma, PrismaClient } from '@/app/generated/prisma/client'
-import { DITokens } from '@/server/di'
-import { injectable, inject } from 'inversify'
-import { Store } from '@alevnyacow/nzmt'
-import { type UserStore, userStoreMetadata } from './user.store'
-
-type Types = Store.Types<UserStore>
+...scaffolded code
 
 const mappers = {
 	toFindOnePayload: (source: Types['findOnePayload']): Prisma.UserWhereUniqueInput => {
@@ -172,7 +164,7 @@ const mappers = {
 
 @injectable()
 export class UserPrismaStore implements UserStore {
-    ..scaffolded implementation goes here
+    ..scaffolded code
 ```
 
 Pretty cool, right? All you need to do is implementing `mappers` and in the vast majority of cases it's enough to have working `Prisma` store. And even more - `RAM` implementation works out of the box! ✨
