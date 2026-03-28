@@ -4,121 +4,219 @@
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt)
 
-# About
+# What
 
-**Not** a framework. Seriously, we have enough of those. NZMT is just the tools you always wanted in Next.js, plus a scaffolder that spins up server logic and client queries. Full-stack, the Next.js way!
+Next.js tools you actually missed + a scaffolder for server logic & client queries. Not a framework. Full-stack, batteries included. ⚡
 
-Think: dependency injection + Zod validation + DDD vibes... but without drowning in boilerplate. You write the fun stuff; NZMT handles the boring stuff.
+# Why
 
-Batteries included.
+- ☕ Keep using plain Next.js — just faster and cleaner. Skip the moment when some “helpful” framework fights you, making you wonder if coding it yourself would’ve been easier.
+- 🧙 Focus on your domain logic without drowning in full-blown DDD.
+- ✨ DI, Zod validation, project structure & API controllers out of the box.
+- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger — and yes, it’s fun. (Well, not *literally* at the snap of a finger — that’s just marketing, to be honest. You still need to run one CLI command.)
 
-## Why NZMT?
+# Quick start with Prisma
 
-- Focus on your domain logic without drowning in full-blown DDD.
-- Keep using plain Next.js, just faster and cleaner — no extra framework required.
-- Watch entities, stores, services, controllers, handlers, and client-side queries appear automatically (and yes, it’s actually fun).
-
-# Quick start (Prisma + client-side queries)
-
-Assuming you have a Next.js project with a generated Prisma client, `User` Prisma model and configured `@tanstack/react-query`:
-
-## Initialization
-
-1. Install required dependencies and NZMT itself:
+Example with CRUD API for User entity with react queries (assuming you have a Next.js project with a generated Prisma client `User` prisma schema and configured `@tanstack/react-query`).
 
 ```bash
-npm install inversify zod reflect-metadata @alevnyacow/nzmt
-```
+# 1. Install NZMT and dependencies
+npm i inversify zod reflect-metadata @alevnyacow/nzmt
 
-2. Enable `Experimental decorators` and `Emit Decorator Metadata` options in your `tsconfig.json`.
+# 2. Enable decorators in tsconfig.json
+# {
+#   "compilerOptions": {
+#     "experimentalDecorators": true,
+#     "emitDecoratorMetadata": true
+#   }
+# }
 
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
-}
-```
-
-3. Initialize NZMT (must be done once). This will set up all required infrastructure and configuration for you:
-
-```bash
+# 3. Initialize NZMT (once)
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
-```
 
-## Scaffolding
-
-Now you can scaffold everything you need for `User` entity CRUD API in one CLI command:
-
-```bash
+# 4. Scaffold CRUD API for `User` entity
 npx nzmt crud-api user
 ```
 
-This will generate:
+Let's break down what's been scaffolded.
 
-- `User` entity
-- `UserStore` contract with `RAM` and `Prisma` implementations
-- `UserService` with all business methods
-- `UserController` with ready-to-use API endpoints
-- Fully typed `UserAPI` contract (endpoints + DTOs) for client usage
-- API `route handlers` inside your `app` folder
-- `React queries`. Fully typed and ready to be used in your client-side code!
+### 1. Scaffolded `UserEntity`
 
-**All code is editable - you stay in full control!**
+```ts
+/** /shared/entities/user/user.entity.ts **/
 
-So, only two things left to do:
+import z from 'zod'
+import { ValueObjects } from '@alevnyacow/nzmt'
 
-- Describe entity properties and validation rules using Zod for the `User` entity in the scaffolded file `/shared/entities/user/user.entity.ts`.
+export type UserModel = z.infer<typeof User.schema>
 
-- Implement Prisma mappers in `/server/stores/user/user.store.prisma.ts`.  
-All methods and contracts are already scaffolded; you only need to describe the mappers themselves. RAM store implementation works out of the box.
+export class User {
+	static schema = z.object({
+		id: ValueObjects.Identifier.schema,
+		
+	})
+	
+	private constructor(private readonly data: UserModel) {}
+	
+	static create = (data: UserModel) => {
+		const parsedModel = User.schema.parse(data)
+		return new User(parsedModel)
+	}
+	
+	get model(): UserModel {
+		return this.data
+	}
+}
+```
 
-# Design principles
+All that’s left is to define the entity’s structure and validation in the static field `schema` (Zod). All related types are already derived, so contracts update automatically. Every scaffolded source file is fully editable, so you're in full control - you can add fields, methods, etc..
 
-## Core idea
+### 2. Scaffolded `UserStore` contract with `RAM` (in-memory) and `Prisma` implementations
 
-DDD is powerful, but it truly shines in large-scale systems with large teams. In practice, developers often face a trade-off:
-either adopt heavy architectural concepts or build with little to no structure at all. **Mature engineering is about trade-offs. A good tool should help you make them intentionally.**
+We'll cover two of generated files that need your attention. First is a general user store description.
 
-That’s what this toolkit is designed for. It brings the benefits of DDD without unnecessary complexity that can slow down early development — and adds scaffolding to move even faster. **Automate what’s routine. Stay flexible for what’s complex.**
+```ts
+/** /server/stores/users/user.store.ts **/
 
-## Server-side layer
+import { Store } from '@alevnyacow/nzmt'
+import { User } from '@/shared/entities/user'
 
-Server-side logic is structured into four core modules: *Stores*, *Services*, *Controllers*, and *Providers*.
+export const userStoreMetadata = {
+	models: {
+		list: User.schema,
+		details: User.schema,
+	},
 
-- **Stores** encapsulate Data Layer logic with no business rules.
-- **Services** define business logic and use-case flows.
-- **Controllers** handle API requests and delegate work to services.
-- **Providers** manage integrations with external systems (e.g. email, third-party APIs).
+	searchPayload: {
+		list: User.schema.omit({ id: true }),
+		specific: User.schema.pick({ id: true }),
+	},
 
-## Shared layer
+	actionsPayload: {
+		create: User.schema.omit({ id: true }),
+		update: User.schema.omit({ id: true }).partial(),
+	},
 
-There are also two building blocks shared across server and client: Entities and Value Objects.
+	name: 'UserStore'
+} satisfies Store.Metadata
 
-- **Entities** represent domain objects used throughout the application. They don’t include data access or business flow logic, but may contain pure domain logic, contracts and invariants (e.g. User, Product).
-- **Value Objects** define reusable, strongly-typed invariants for meaningful concepts such as Pagination or Identifier.
+export const { schemas: userStoreSchemas } = Store.toModuleMetadata(userStoreMetadata)
 
+export type UserStore = Store.Contract<typeof userStoreMetadata>
+```
 
-# Package API
+Contracts are pretty self-explainatory, but let's break this down anyway.
 
-- Module
-    - `methods` function
-    - `Metadata` type
-    - `DTOs` type
-    - `Methods` type
-    - `Config` type
-- Controller
-    - `endpoints` function
-    - `DefaultErrorCodes` enum
-    - `Guard` type
-    - `OnErrorHandler` type
-    - `SharedConfig` type
-    - `Metadata` type
-    - `Contract` type
-- Store
-    - `methods` function
-    - `InRAM` class generator
-    - `Types` type
-    - `Metadata` type
-    - `Contract` type
+Models:
+
+- `models.list` - list model, `list` method will return list of those entities
+- `models.details` - details model, `details` will return this entity
+
+Search payload:
+
+- `searchPayload.list` - how to filter data in `list` method
+- `searchPayload.specific` - how to find one specific entity in `details` method
+
+Actions payload:
+
+- `actionsPayload.create` - what is needed to create a new entity
+- `actionsPayload.update` - what is needed to update an entity. Note: only update payload must be here, filters will be used from `searchPayload`
+
+All of these schemas can be modified. They don’t even have to be derived from the entity’s schema, but doing so is strongly recommended for consistency.
+
+Second file is a `Prisma` implementation:
+
+```ts
+/** /server/stores/users/user.store.prisma */
+
+import type { Prisma, PrismaClient } from '@/app/generated/prisma/client'
+import { DITokens } from '@/server/di'
+import { injectable, inject } from 'inversify'
+import { Store } from '@alevnyacow/nzmt'
+import { type UserStore, userStoreMetadata } from './user.store'
+
+type Types = Store.Types<UserStore>
+
+const mappers = {
+	toFindOnePayload: (source: Types['findOnePayload']): Prisma.UserWhereUniqueInput => {
+		return {
+			
+		};
+	},
+	toFindListPayload: (source: Types['findListPayload']): Prisma.UserWhereInput => {
+		return {
+			
+		};
+	},
+	toListModel: (source: Prisma.UserGetPayload<{}>): Types['listModel'] => {
+		return {
+			
+		};
+	},
+	toDetails: (source: Prisma.UserGetPayload<{ include: { } }>): Types['details'] => {
+		return {
+			
+		};
+	},
+	toCreatePayload: (source: Types['createPayload']): Prisma.UserCreateInput => {
+		return {
+			
+		};
+	},
+	toUpdatePayload: (source: Types['updatePayload']): Prisma.UserUpdateInput => {
+		return {
+			
+		};
+	}
+}
+
+@injectable()
+export class UserPrismaStore implements UserStore {
+    ..scaffolded implementation goes here
+```
+
+Pretty cool, right? All you need to do is implementing `mappers` and in the vast majority of cases it's enough to have working `Prisma` store. And even more - `RAM` implementation works out of the box! ✨
+
+### 3. Scaffolded `UserService` with all business methods
+
+Works out of the box. ✨
+
+### 4. Scaffolded `UserController` with ready-to-use API endpoints
+
+Works out of the box. ✨
+
+### 5. Scaffolded infrastructure helpers as `PrismaClient`, `Logger` and client util for handy requests.
+
+### 6. Scaffolded `Route handlers` in `/app/api`
+
+Works out of the box. ✨
+
+### 7. Scaffolded `React queries` for all controller methods
+
+Also works out of the box! ✨
+
+Let's take a look at `client/shared/queries/user-controller/GET.ts` for example:
+
+```ts
+import { useQuery } from '@tanstack/react-query'
+import type { UserAPI } from '@/server/controllers/user'
+import { apiRequest } from '@/client/shared/utils'
+
+type Method = UserAPI['endpoints']['GET']
+
+const endpoint = '/api/user-controller'
+
+export const useUserController_GET = (payload: Method['payload']) => {
+	return useQuery<Method['response'], Method['error']>({
+		queryKey: [endpoint, payload],
+		queryFn: () => apiRequest(endpoint, 'GET')(payload)
+	})
+}
+```
+
+- Fully typed and ready for client-side use.
+- `apiRequest` handles endpoint, method, and payload conveniently (also scaffolded and editable).
+
+**All code is editable - you stay in full control! 🔨⚙️**
+
+Now you can start building your domain logic — NZMT handles the boilerplate for you. 🪄
