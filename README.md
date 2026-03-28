@@ -17,7 +17,7 @@ Next.js tools you actually missed + a scaffolder for server logic & client queri
 
 # Quick start with Prisma
 
-Example with CRUD API for User entity with react queries (assuming you have a Next.js project with a generated Prisma client `User` prisma schema and configured `@tanstack/react-query`).
+Example with CRUD API for User entity with react queries (assuming you have a Next.js project with a generated Prisma client, `User` prisma schema, and configured `@tanstack/react-query`).
 
 ```bash
 # 1. Install NZMT and dependencies
