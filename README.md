@@ -6,7 +6,7 @@
 
 # What
 
-Next.js tools you actually missed + a scaffolder for server logic & client queries. Not a framework. Full-stack, batteries included. ⚡
+Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. Not a framework. Full-stack, batteries included. ⚡
 
 # Why
 
