@@ -215,7 +215,7 @@ Command `crud-service` is a lot like the `crud-api` command, but it stops after 
 - tweak the Product store schemas if needed (`/server/stores/product/product.store.ts`)
 - write Prisma store mappers (`/server/stores/product/product.store.prisma.ts`) as in previous example. 
 
-`Services` can be used in Server Actions. So, when you make `crud-api`, this generated service can also be used in Server Actions. Using it is very simple, you need `fromDI` function, which was scaffolded when you initialized NMZT. Let's take a look at combined example with two services we've just created:
+`Services` can be used in Server Actions. Well, basically `Stores` can be used too as they are injected the same way as services, but it's strongly recommended to use services. So, when you make `crud-api`, this generated service can also be used in Server Actions. Using it is very simple, you need `fromDI` function, which was scaffolded when you initialized NMZT. Let's take a look at combined example with two services we've just created:
 
 ```tsx
 'use server'
