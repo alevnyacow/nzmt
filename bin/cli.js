@@ -925,7 +925,7 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\t},`,
             `\t\tdetails_GET: {`,
             `\t\t\tquery: ${crudServiceLowercase}Metadata.schemas.getDetails.payload,`,
-            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getDetails.response.options[0]`,
+            `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.getDetails.response.unwrap()`,
             `\t\t},`,
             `\t\tPOST: {`,
             `\t\t\tbody: ${crudServiceLowercase}Metadata.schemas.create.payload,`,
