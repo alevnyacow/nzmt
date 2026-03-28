@@ -17,7 +17,9 @@ Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for s
 
 # Quick start with Prisma
 
-Example with CRUD API for User entity with react queries (assuming you have a Next.js project with a generated Prisma client, `User` prisma schema, and configured `@tanstack/react-query`).
+Assuming you have a Next.js project with a generated Prisma client, and configured `@tanstack/react-query`:
+
+## Setup phase
 
 ```bash
 # 1. Install NZMT and dependencies
@@ -31,15 +33,21 @@ npm i inversify zod reflect-metadata @alevnyacow/nzmt
 #   }
 # }
 
-# 3. Initialize NZMT (once)
-npx nzmt init prismaClientPath:@/app/generated/prisma/client
-# it scaffolded `nzmt.config.json`, infrastructure, client utils, etc.
+# 3. Initialize NZMT with the absolute Prisma client path as a parameter
+npx nzmt init prismaClientPath:@/generated/prisma/client
+```
 
-# 4. Scaffold CRUD API for `User` entity
+After NZMT some basic infrastructure and config file were scaffolded. Open scaffolded file `/server/infrastructure/prisma/client.ts`, then import and set up the necessary Prisma adapter. Now you’re ready to use NZMT! 
+
+## Example 1. CRUD for `User` entity with API route handlers and react queries
+
+Assuming you have `User` prisma schema.
+
+```bash
 npx nzmt crud-api user
 ```
 
-Let's break down what's been scaffolded after `npx nzmt crud-api user` command:
+Let's break down what's been scaffolded after this command:
 
 ### 1. Scaffolded `UserEntity`
 
@@ -70,7 +78,7 @@ export class User {
 }
 ```
 
-All that’s left is to define the entity’s structure and validation in the static field `schema` (Zod). All related types are already derived, so contracts update automatically. Every scaffolded source file is fully editable, so you're in full control - you can add fields, methods, etc..
+All that’s left is to define the entity’s structure and validation in the static field `schema` (Zod). All related types are already derived (including ones in client-side queries), so contracts update automatically. **Every scaffolded source file is fully editable**, so you're in full control - you can add fields, methods, etc..
 
 ### 2. Scaffolded `UserStore` contract with `RAM` (in-memory) and `Prisma` implementations
 
@@ -141,26 +149,7 @@ const mappers = {
 			
 		};
 	},
-	toListModel: (source: Prisma.UserGetPayload<{}>): Types['listModel'] => {
-		return {
-			
-		};
-	},
-	toDetails: (source: Prisma.UserGetPayload<{ include: { } }>): Types['details'] => {
-		return {
-			
-		};
-	},
-	toCreatePayload: (source: Types['createPayload']): Prisma.UserCreateInput => {
-		return {
-			
-		};
-	},
-	toUpdatePayload: (source: Types['updatePayload']): Prisma.UserUpdateInput => {
-		return {
-			
-		};
-	}
+    ... few other mappers
 }
 
 @injectable()
@@ -197,7 +186,7 @@ type Method = UserAPI['endpoints']['GET']
 
 const endpoint = '/api/user-controller'
 
-export const useUserController_GET = (payload: Method['payload']) => {
+export const useUserAPI_GET = (payload: Method['payload']) => {
 	return useQuery<Method['response'], Method['error']>({
 		queryKey: [endpoint, payload],
 		queryFn: () => apiRequest(endpoint, 'GET')(payload)
@@ -208,6 +197,50 @@ export const useUserController_GET = (payload: Method['payload']) => {
 - Fully typed and ready for client-side use.
 - `apiRequest` handles endpoint, method, and payload conveniently (also scaffolded and editable).
 
-**All code is editable - you stay in full control! 🔨⚙️**
+And once again - **all code is editable - you stay in full control! 🔨⚙️**
 
 Now you can start building your domain logic — NZMT handles the boilerplate for you. 🪄
+
+## Example 2. CRUD for `Product` entity with only server actions
+
+Assuming you have `Product` prisma schema.
+
+```bash
+npx nzmt crud-service product
+```
+
+Command `crud-service` is a lot like the `crud-api` command, but it stops after generating service. So, you need to:
+
+- describe `Product` entity (`/shared/entities/product/product.entity.ts`)
+- tweak the Product store schemas if needed (`/server/stores/product/product.store.ts`)
+- write Prisma store mappers (`/server/stores/product/product.store.prisma.ts`) as in previous example. 
+
+`Services` can be used in Server Actions. So, when you make `crud-api`, this generated service can also be used in Server Actions. Using it is very simple, you need `fromDI` function, which was scaffolded when you initialized NMZT. Let's take a look at combined example with two services we've just created:
+
+```tsx
+'use server'
+
+import { fromDI } from "@/server/di"
+import type { UserService } from "@/server/services/user"
+import type { ProductService } from "@/server/services/product"
+
+export default async function() {
+    // keys in fromDI function are strongly typed
+    const userService = fromDI<UserService>('UserService')
+    const productService = fromDI<ProductService>('ProductService')
+
+    const driver8 = await userService.getDetails({ 
+        filter: { id: 'driver-8' } 
+    })
+    const allProducts = await productService.getList({
+        filter: { }
+    })
+
+    return <div>
+        Take a break, {JSON.stringify(driver8)}
+        {JSON.stringify(driver8)}, take a break
+        
+        Also we've got some products: {JSON.stringify(allProducts)}
+    </div>
+}
+```

@@ -322,12 +322,11 @@ function initPrisma() {
     fs.mkdirSync(prismaFolder, { recursive: true })
 
     fs.writeFileSync(path.resolve(prismaFolder, 'client.ts'), [
-        `import { PrismaPg } from '@prisma/adapter-pg'`,
+        '/** ! import required Prisma adapter */',
         `import { PrismaClient } from '${prismaClientPath}'`,
         ``,
-        `const adapter = new PrismaPg({`,
-        `\tconnectionString: process.env.DATABASE_URL`,
-        `})`,
+        'const connectionString = `${process.env.DATABASE_URL}`',
+        `const adapter = /** ! instanse of the adapter */`,
         ``,
         `export const prismaClient = new PrismaClient({ adapter })`
     ].join('\n'))
@@ -1105,7 +1104,7 @@ function generateQueries(lowerCase, upperCase) {
             ``,
             rootMethod === 'GET' 
                 ? [
-                    `export const use${upperCase}Controller_${rootMethod} = (payload: Method['payload']) => {`,
+                    `export const use${upperCase}API_${rootMethod} = (payload: Method['payload']) => {`,
                     `\treturn useQuery<Method['response'], Method['error']>({`,
                     `\t\tqueryKey: [endpoint, payload],`,
                     `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
@@ -1113,7 +1112,7 @@ function generateQueries(lowerCase, upperCase) {
                     `}`
                 ].join('\n') 
                 : [
-                    `export const use${upperCase}Controller_${rootMethod} = () => {`,
+                    `export const use${upperCase}API_${rootMethod} = () => {`,
                     `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
                     `\t\tmutationFn: apiRequest(endpoint, '${rootMethod}')`,
                     `\t})`,
@@ -1141,7 +1140,7 @@ function generateQueries(lowerCase, upperCase) {
                 ``,
                 method === 'GET' 
                     ? [
-                        `export const use${upperCase}Controller_${fullMethodName} = (payload: Method['payload']) => {`,
+                        `export const use${upperCase}API_${fullMethodName} = (payload: Method['payload']) => {`,
                         `\treturn useQuery<Method['response'], Method['error']>({`,
                         `\t\tqueryKey: [endpoint, payload],`,
                         `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
@@ -1149,7 +1148,7 @@ function generateQueries(lowerCase, upperCase) {
                         `}`
                     ].join('\n') 
                     : [
-                        `export const use${upperCase}Controller_${fullMethodName} = () => {`,
+                        `export const use${upperCase}API_${fullMethodName} = () => {`,
                         `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
                         `\t\tmutationFn: apiRequest(endpoint, '${method}')`,
                         `\t})`,
