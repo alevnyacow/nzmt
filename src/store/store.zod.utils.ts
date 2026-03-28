@@ -1,10 +1,10 @@
 import type {
     ZodArray,
     ZodBoolean,
+    ZodNullable,
     ZodObject,
     ZodString,
-    ZodType,
-    ZodUnion
+    ZodType
 } from 'zod';
 import z from 'zod';
 import { Pagination } from '../entities/pagination.entity';
@@ -234,9 +234,9 @@ export const toModuleMetadata = <
             details: {
                 // @ts-expect-error
                 payload: ZodObject<Parameters<ZodData['details']>[0]>;
-                response: ZodUnion<
+                response: ZodNullable<
                     // @ts-expect-error
-                    [Schemas['models']['details'], z.ZodNull]
+                    Schemas['models']['details']
                 >;
             };
             create: {
