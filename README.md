@@ -37,7 +37,7 @@ npm i inversify zod reflect-metadata @alevnyacow/nzmt
 npx nzmt init prismaClientPath:@/generated/prisma/client
 ```
 
-After NZMT some basic infrastructure and config file were scaffolded. Open scaffolded file `/server/infrastructure/prisma/client.ts`, then import and set up the necessary Prisma adapter. Now you’re ready to use NZMT! 
+After NZMT initialization some basic infrastructure and config file were scaffolded. Open scaffolded file `/server/infrastructure/prisma/client.ts`, then import and set up there the necessary Prisma adapter. Now you’re ready to use NZMT! 
 
 ## Example 1. CRUD for `User` entity with API route handlers and react queries
 
