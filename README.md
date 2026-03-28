@@ -33,6 +33,7 @@ npm i inversify zod reflect-metadata @alevnyacow/nzmt
 
 # 3. Initialize NZMT (once)
 npx nzmt init prismaClientPath:@/app/generated/prisma/client
+# it scaffolded `nzmt.config.json`, infrastructure, client utils, etc.
 
 # 4. Scaffold CRUD API for `User` entity
 npx nzmt crud-api user
@@ -177,13 +178,11 @@ Works out of the box. ✨
 
 Works out of the box. ✨
 
-### 5. Scaffolded infrastructure helpers as `PrismaClient`, `Logger` and client util for handy requests.
-
-### 6. Scaffolded `Route handlers` in `/app/api`
+### 5. Scaffolded `Route handlers` in `/app/api`
 
 Works out of the box. ✨
 
-### 7. Scaffolded `React queries` for all controller methods
+### 6. Scaffolded `React queries` for all controller methods
 
 Also works out of the box! ✨
 
