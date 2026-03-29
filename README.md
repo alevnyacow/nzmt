@@ -6,7 +6,7 @@
 
 # TL;DR 🕰
 
-You can **scaffold** safe runtime-validated production-ready **server modules easily usable as Server Actions** with DDD-inspired structure and **ready-to-use React Queries** in one CLI command. Fully wired, editable, no boilerplate needed.
+You can **scaffold** safe runtime-validated production-ready **server modules easily usable as Server Actions** with DDD-inspired structure **and ready-to-use React Queries in one CLI command**. Fully wired, editable, no boilerplate needed.
 
 # What and Why
 
