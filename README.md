@@ -6,13 +6,13 @@
 
 # TL;DR 🕰
 
-You can **scaffold** safe runtime-validated production-ready **server modules easily usable as Server Actions** with DDD-inspired structure **and ready-to-use React Queries in one CLI command**. Fully wired, editable, no boilerplate needed.
+Scaffold production-ready server modules in Next.js with a single CLI command, which also generates ready-to-use React Queries. Modules work seamlessly with Server Actions out of the box.
 
 # What and Why
 
 Next Zod Modules Toolkit. 
 
-Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build features in Next.js without boilerplate. ⚡
+Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build features in Next.js without boilerplate. Fully wired, editable, no boilerplate needed. ⚡
 
 - ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
