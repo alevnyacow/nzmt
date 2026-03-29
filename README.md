@@ -12,7 +12,7 @@ Scaffold production-ready server modules in Next.js with a single CLI command, w
 
 Next Zod Modules Toolkit. 
 
-Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build features in Next.js without boilerplate. Fully wired, editable, no boilerplate needed. ⚡
+Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included. ⚡
 
 - ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
