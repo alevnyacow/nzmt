@@ -205,6 +205,7 @@ But:
 - no framework lock-in
 - no magic runtime
 - full control over your code
+- power of react-query for client-server requests
 - no new layers of client-server interaction
 
 Just better Next.js.
