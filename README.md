@@ -167,7 +167,7 @@ export default async function() {
 
 ## Do I really need to understand DI and other fancy concepts to use NZMT?
 
-No. NZMT provides you safe and intuitive facade above `inversifyjs` and automatically registers dependencies. To get an instance you just use `fromDI` function with strongly typed keys like this:
+No. NZMT provides you safe and intuitive facade above `inversifyjs` and automatically registers dependencies. To get an instance you just use `fromDI` function with strongly typed keys in any place of your server code like this:
 
 ```tsx
 const userService = fromDI<UserService>('UserService')
@@ -176,6 +176,12 @@ const userService = fromDI<UserService>('UserService')
 ## Can I tweak scaffolded files?
 
 Yes — everything is fully editable, including configuration. You can think of NZMT as shadcn-style approach for server-side logic — scaffold, then fully own the code. 
+
+## Why data layer modules are called `Stores` and not `Repositories`?
+
+Good design is impossible without precise terminology. The definition of a "Repository" can vary depending on the terminology used. It’s frustrating when you’ve spent your whole life writing repositories, and then some smart aleck comes along and accuses you of having been writing, say, Data Access Objects all this time! In general, a "Repository" is simply a pattern for working with data. Often, what we really need isn’t a specific pattern, but a properly separated abstraction layer for data handling, which we can then adapt to our needs. That’s exactly why the names of the modules used for the Data Layer in NZMT are kept as abstract as possible, without tying them to any specific data-handling pattern. 
+
+This approach wasn’t invented here; it has already proven successful, for example, in Go.
 
 ## Why not just use plain Next.js?
 
@@ -199,7 +205,7 @@ Again, you can use whatever you want, God bless you.
 `NZMT` sits between `tRPC` and `NestJS`:
 
 - from tRPC — type safety and DX
-- from NestJS — structure and layering
+- from NestJS — structure and layering, but more DDD-inspired
 
 But:
 - no framework lock-in
@@ -207,5 +213,4 @@ But:
 - full control over your code
 
 Just better Next.js.
-
 
