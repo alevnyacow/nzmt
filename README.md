@@ -78,11 +78,11 @@ This command generates:
 
 Everything is wired automatically via DI — no manual setup needed.
 
-2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` (static `schema` field).
+2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` file (static `schema` field).
 
-3. Tweak `UserStore` schemas if needed in scaffolded `/server/stores/users/user.store.ts`.
+3. Tweak `UserStore` schemas if needed in scaffolded `/server/stores/users/user.store.ts` file.
 
-4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in scaffolded `server/stores/users/user.store.prisma.ts` (`mappers` object is already there for you with all functions, just implement them).
+4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in scaffolded `server/stores/users/user.store.prisma.ts` file (`mappers` object is already there for you with all types and functions, just implement them).
 
 So, after one CLI command and few tweaks you can use your React query hooks or Server actions. 🪄
 
