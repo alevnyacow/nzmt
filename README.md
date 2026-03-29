@@ -55,7 +55,7 @@ This command generates:
 - Prisma Client instance injected in DI
 - Some infrastructure helpers also already injected in DI
 
-4. Import and set up there the necessary Prisma adapter in `/server/infrastructure/prisma/client.ts`
+4. Import and set up the necessary Prisma adapter in scaffolded `/server/infrastructure/prisma/client.ts` file.
 
 ## Example 1. CRUD for `User` entity with React queries and Server Actions
 
