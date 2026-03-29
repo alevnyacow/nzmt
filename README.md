@@ -73,7 +73,7 @@ This command generates:
 - `UserStore` (with Prisma + RAM implementations)
 - `UserService` (ready to be used in Server Actions)
 - `UserController` proxying UserService methods
-- User `API routes` for UserController endpoints
+- `API routes` for UserController endpoints
 - `React Query hooks` for fetching UserController from client-side
 
 Everything is wired automatically via DI — no manual setup needed.
