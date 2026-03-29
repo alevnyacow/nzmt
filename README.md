@@ -6,13 +6,31 @@
 
 # What
 
-Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. Not a framework. Full-stack, batteries included. ⚡
+Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included. 
+
+Build full-stack features in Next.js without boilerplate. ⚡
+
+# TL;DR
+
+One command:
+
+`npx nzmt crud-api user`
+
+Gives you:
+
+- entity and stores (Prisma and in-memory)
+- fully typed API routes
+- services (for Server Actions)
+- Zod validation
+- React Query hooks
+
+All wired together and fully editable. No boilerplate. See `Quick start with Prisma` for a full working example.
 
 # Why
 
 - ☕ Keep using plain Next.js — just faster and cleaner. Skip the moment when some “helpful” framework fights you, making you wonder if coding it yourself would’ve been easier.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
-- ✨ DI, Zod validation, project structure & API controllers out of the box.
+- ✨ DI, Zod validation, project structure, handy API controllers and Server actions out of the box.
 - 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger — and yes, it’s fun. (Well, not *literally* at the snap of a finger — that’s just marketing, to be honest. You still need to run one CLI command.)
 
 # Quick start with Prisma
@@ -21,228 +39,173 @@ Assuming you have a Next.js project with a generated Prisma client, and configur
 
 ## Setup phase
 
+1. Install NZMT and dependencies:
+
 ```bash
-# 1. Install NZMT and dependencies
 npm i inversify zod reflect-metadata @alevnyacow/nzmt
+```
 
-# 2. Enable decorators in tsconfig.json
-# {
-#   "compilerOptions": {
-#     "experimentalDecorators": true,
-#     "emitDecoratorMetadata": true
-#   }
-# }
+2. Enable decorators in tsconfig.json
 
-# 3. Initialize NZMT with the absolute Prisma client path as a parameter
+```ts
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+3. Initialize NZMT with the absolute Prisma client path as a parameter
+
+```bash
 npx nzmt init prismaClientPath:@/generated/prisma/client
 ```
 
-After NZMT initialization some basic infrastructure and config file were scaffolded. Open scaffolded file `/server/infrastructure/prisma/client.ts`, then import and set up there the necessary Prisma adapter. Now you’re ready to use NZMT! 
+This command generates:
 
-## Example 1. CRUD for `User` entity with API route handlers and react queries
+- `nzmt.config.json` file
+- DI infrastructure boilerplate
+- Prisma Client instance injected in DI
+- Some infrastructure helpers also already injected in DI
+
+4. Import and set up there the necessary Prisma adapter in `/server/infrastructure/prisma/client.ts`
+
+## Example 1. CRUD for `User` entity with API route handlers and Server Actions
 
 Assuming you have `User` prisma schema.
+
+1. Run NZMT scaffolder:
 
 ```bash
 npx nzmt crud-api user
 ```
 
-Let's break down what's been scaffolded after this command:
+This command generates:
 
-### 1. Scaffolded `UserEntity`
+- `UserEntity`
+- `UserStore` (with Prisma + RAM implementations)
+- `UserService` (ready to be used in Server Actions)
+- `UserController` proxying UserService methods
+- User `API routes` for UserController endpoints
+- `React Query hooks` for fetching UserController from client-side
 
-```ts
-/** /shared/entities/user/user.entity.ts **/
+Everything is wired automatically via DI — no manual setup needed.
 
-import z from 'zod'
-import { ValueObjects } from '@alevnyacow/nzmt'
+2. Describe your entity in `/shared/entities/user/user.entity.ts` (look at static `schema` field)
 
-export type UserModel = z.infer<typeof User.schema>
+3. Tweak `UserStore` schemas if needed in `/server/stores/users/user.store.ts`
 
-export class User {
-	static schema = z.object({
-		id: ValueObjects.Identifier.schema,
-		
-	})
-	
-	private constructor(private readonly data: UserModel) {}
-	
-	static create = (data: UserModel) => {
-		const parsedModel = User.schema.parse(data)
-		return new User(parsedModel)
-	}
-	
-	get model(): UserModel {
-		return this.data
-	}
-}
+4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in `server/stores/users/user.store.prisma.ts` (look at `mappers` object)
+
+And after one CLI command and few tweaks you can use your React query hooks or Server actions. 🪄
+
+### How to use React query hooks
+
+```
+Mental model: Client → React Query → API → Controller → Service → Store → DB
 ```
 
-All that’s left is to define the entity’s structure and validation in the static field `schema` (Zod). All related types are already derived (including ones in client-side queries), so contracts update automatically. **Every scaffolded source file is fully editable**, so you're in full control - you can add fields, methods, etc..
+Everything is already scaffolded for you, just import it and use! ✨
 
-### 2. Scaffolded `UserStore` contract with `RAM` (in-memory) and `Prisma` implementations
+```tsx
+'use client'
 
-We'll cover two of generated files that need your attention. First is a general user store description.
+import { useUserAPI_GET } from "@/client/shared/queries/user-controller/GET";
+import { useUserAPI_POST } from "@/client/shared/queries/user-controller/POST";
 
-```ts
-/** /server/stores/users/user.store.ts **/
+export default function Home() {
+  const { mutate: addUser } = useUserAPI_POST()
+  const { data, isFetching } = useUserAPI_GET({ query: {} })
 
-import { Store } from '@alevnyacow/nzmt'
-import { User } from '@/shared/entities/user'
+  const addGreg = () => {
+    addUser({ body: { payload: { name: 'Greg' } } })
+  }
 
-export const userStoreMetadata = {
-	models: {
-		list: User.schema,
-		details: User.schema,
-	},
-
-	searchPayload: {
-		list: User.schema.omit({ id: true }),
-		specific: User.schema.pick({ id: true }),
-	},
-
-	actionsPayload: {
-		create: User.schema.omit({ id: true }),
-		update: User.schema.omit({ id: true }).partial(),
-	},
-
-	name: 'UserStore'
-} satisfies Store.Metadata
-
-...scaffolded code
-```
-
-Contracts are pretty self-explainatory, but let's break this down anyway.
-
-Models:
-
-- `models.list` - list model, `list` method will return list of those entities
-- `models.details` - details model, `details` will return this entity
-
-Search payload:
-
-- `searchPayload.list` - how to filter data in `list` method
-- `searchPayload.specific` - how to find one specific entity in `details` method
-
-Actions payload:
-
-- `actionsPayload.create` - what is needed to create a new entity
-- `actionsPayload.update` - what is needed to update an entity. Note: only update payload must be here, filters will be used from `searchPayload`
-
-All of these schemas can be modified. They don’t even have to be derived from the entity’s schema, but doing so is strongly recommended for consistency.
-
-Second file is a `Prisma` implementation:
-
-```ts
-/** /server/stores/users/user.store.prisma */
-
-...scaffolded code
-
-const mappers = {
-	toFindOnePayload: (source: Types['findOnePayload']): Prisma.UserWhereUniqueInput => {
-		return {
-			
-		};
-	},
-	toFindListPayload: (source: Types['findListPayload']): Prisma.UserWhereInput => {
-		return {
-			
-		};
-	},
-    ... few other mappers
+  return (
+    <div>
+      <button onClick={addGreg}>
+        Add Greg
+      </button>
+      
+      {isFetching ? 'Loading users...' : JSON.stringify(data)}
+    </div>
+  );
 }
 
-@injectable()
-export class UserPrismaStore implements UserStore {
-    ..scaffolded code
 ```
 
-Pretty cool, right? All you need to do is implementing `mappers` and in the vast majority of cases it's enough to have working `Prisma` store. And even more - `RAM` implementation works out of the box! ✨
+### How to use server actions
 
-### 3. Scaffolded `UserService` with all business methods
-
-Works out of the box. ✨
-
-### 4. Scaffolded `UserController` with ready-to-use API endpoints
-
-Works out of the box. ✨
-
-### 5. Scaffolded `Route handlers` in `/app/api`
-
-Works out of the box. ✨
-
-### 6. Scaffolded `React queries` for all controller methods
-
-Also works out of the box! ✨
-
-Let's take a look at `client/shared/queries/user-controller/GET.ts` for example:
-
-```ts
-import { useQuery } from '@tanstack/react-query'
-import type { UserAPI } from '@/server/controllers/user'
-import { apiRequest } from '@/client/shared/utils'
-
-type Method = UserAPI['endpoints']['GET']
-
-const endpoint = '/api/user-controller'
-
-export const useUserAPI_GET = (payload: Method['payload']) => {
-	return useQuery<Method['response'], Method['error']>({
-		queryKey: [endpoint, payload],
-		queryFn: () => apiRequest(endpoint, 'GET')(payload)
-	})
-}
+```
+Mental model: Server Action → Service → Store → DB
 ```
 
-- Fully typed and ready for client-side use.
-- `apiRequest` handles endpoint, method, and payload conveniently (also scaffolded and editable).
-
-And once again - **all code is editable - you stay in full control! 🔨⚙️**
-
-Now you can start building your domain logic — NZMT handles the boilerplate for you. 🪄
-
-## Example 2. CRUD for `Product` entity with only server actions
-
-Assuming you have `Product` prisma schema.
-
-```bash
-npx nzmt crud-service product
-```
-
-Command `crud-service` is a lot like the `crud-api` command, but it stops after generating service. So, you need to:
-
-- describe `Product` entity (`/shared/entities/product/product.entity.ts`)
-- tweak the Product store schemas if needed (`/server/stores/product/product.store.ts`)
-- write Prisma store mappers (`/server/stores/product/product.store.prisma.ts`) as in previous example. 
-
-`Services` can be used in Server Actions. Well, basically `Stores` can be used too as they are injected the same way as services, but it's strongly recommended to use services. Also, when you make `crud-api`, this generated service can also be used in Server Actions. 
-
-Using services in Server Actions is very simple. You only need an instance of the service and then you can call required methods. To get an instance, use `fromDI` function, which was scaffolded when you initialized NMZT. Let's take a look at combined example with two services we've just created:
+Just get required instances from DI and use methods. That's all. ✨
 
 ```tsx
 'use server'
 
 import { fromDI } from "@/server/di"
 import type { UserService } from "@/server/services/user"
-import type { ProductService } from "@/server/services/product"
 
 export default async function() {
-    // keys in fromDI function are strongly typed
     const userService = fromDI<UserService>('UserService')
-    const productService = fromDI<ProductService>('ProductService')
 
     const driver8 = await userService.getDetails({ 
         filter: { id: 'driver-8' } 
-    })
-    const allProducts = await productService.getList({
-        filter: { }
     })
 
     return <div>
         Take a break, {JSON.stringify(driver8)}
         {JSON.stringify(driver8)}, take a break
-        
-        Also we've got some products: {JSON.stringify(allProducts)}
     </div>
 }
 ```
+
+# Common questions
+
+## Do I really need to understand DI and other fancy concepts to use NZMT?
+
+No. NZMT provides you safe and intuitive facade above `inversifyjs` and automatically registers dependencies. To get an instance you just use `fromDI` function with strongly typed keys like this:
+
+```tsx
+const userService = fromDI<UserService>('UserService')
+```
+
+## Can I tweak scaffolded files?
+
+Yes — everything is fully editable, including configuration. You can think of NZMT as shadcn-style approach for server-side logic — scaffold, then fully own the code. 
+
+## Why not just use plain Next.js?
+
+You can.
+
+NZMT removes the repetitive parts:
+- validation
+- API wiring
+- client queries
+- service layer
+- data layer
+
+So you can focus on your logic while NZMT handles boring tech stuff like folder structure and contracts. 
+
+P.S. In general, you remain within plain Next.js.
+
+## Why not use Nest or tRPC?
+
+Again, you can use whatever you want, God bless you.
+
+`NZMT` sits between `tRPC` and `NestJS`:
+
+- from tRPC — type safety and DX
+- from NestJS — structure and layering
+
+But:
+- no framework lock-in
+- no magic runtime
+- full control over your code
+
+Just better Next.js.
+
+
