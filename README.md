@@ -103,7 +103,7 @@ And after one CLI command and few tweaks you can use your React query hooks or S
 ### How to use React query hooks
 
 ```
-Mental model: Client → React Query → API → Controller → Service → Store → DB
+Schema: Client → React Query → API → Controller → Service → Store → DB
 ```
 
 Everything is already scaffolded for you, just import it and use! ✨
@@ -138,7 +138,7 @@ export default function Home() {
 ### How to use server actions
 
 ```
-Mental model: Server Action → Service → Store → DB
+Schema: Server Action → Service → Store → DB
 ```
 
 Just get required instances from DI and use methods. That's all. ✨
