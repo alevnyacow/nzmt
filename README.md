@@ -10,11 +10,13 @@ You can **scaffold** safe runtime-validated production-ready **server modules ea
 
 # What and Why
 
-Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build features in Next.js without boilerplate. ⚡
+Next Zod Modules Toolkit. 
+
+Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build features in Next.js without boilerplate. ⚡
 
 - ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
-- ✨ DI, handy API controllers and a bunch of other cool things out of the box aimed at improving your DX.
+- ✨ DI, handy API controllers and a bunch of other cool things aimed at improving your DX out of the box.
 - 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger.
 
 # Quick start with Prisma
