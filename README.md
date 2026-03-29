@@ -15,7 +15,7 @@ Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for s
 - ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
 - ✨ DI, handy API controllers and a bunch of other cool things out of the box aimed at improving your DX.
-- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger. (Well, not *literally* at the snap of a finger — that’s just a marketing, to be honest. You still need to run one CLI command.)
+- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger.
 
 # Quick start with Prisma
 
@@ -76,13 +76,13 @@ This command generates:
 
 Everything is wired automatically via DI — no manual setup needed.
 
-2. Describe your entity in `/shared/entities/user/user.entity.ts` (look at static `schema` field)
+2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` (static `schema` field)
 
-3. Tweak `UserStore` schemas if needed in `/server/stores/users/user.store.ts`
+3. Tweak `UserStore` schemas if needed in scaffolded `/server/stores/users/user.store.ts`.
 
-4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in `server/stores/users/user.store.prisma.ts` (look at `mappers` object)
+4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in scaffolded `server/stores/users/user.store.prisma.ts` (`mappers` object is already there for you with all functions, just implement them).
 
-And after one CLI command and few tweaks you can use your React query hooks or Server actions. 🪄
+So, after one CLI command and few tweaks you can use your React query hooks or Server actions. 🪄
 
 ### How to use React query hooks
 
