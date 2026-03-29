@@ -69,7 +69,7 @@ npx nzmt crud-api user
 
 This command generates:
 
-- `UserEntity`
+- `User` entity
 - `UserStore` (with Prisma + RAM implementations)
 - `UserService` (ready to be used in Server Actions)
 - `UserController` proxying UserService methods
