@@ -1080,11 +1080,13 @@ function generateQueries(lowerCase, upperCase) {
         return acc
     }, {})
 
-    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}-controller`)
-    
+    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`, 'queries')
+    let scaffoldedMethods = []
+
     fs.mkdirSync(controllerQueriesPath, { recursive: true })
 
     for (const rootMethod of rootMethods) {
+        scaffoldedMethods.push(rootMethod)
         if (!rootMethod) {
             continue
         }
@@ -1094,7 +1096,7 @@ function generateQueries(lowerCase, upperCase) {
             continue
         }
         fs.writeFileSync(fileName, [
-            `import { ${rootMethod === 'GET' ? 'useQuery' : 'useMutation'} } from '@tanstack/react-query'`,
+            `import { ${rootMethod === 'GET' ? 'useQuery' : 'useMutation, useQueryClient'} } from '@tanstack/react-query'`,
             `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
             `import { apiRequest } from '@${config.paths.clientUtils}'`,
             '',
@@ -1104,17 +1106,19 @@ function generateQueries(lowerCase, upperCase) {
             ``,
             rootMethod === 'GET' 
                 ? [
-                    `export const use${upperCase}API_${rootMethod} = (payload: Method['payload']) => {`,
+                    `export const use${rootMethod} = (payload: Method['payload']) => {`,
                     `\treturn useQuery<Method['response'], Method['error']>({`,
-                    `\t\tqueryKey: [endpoint, payload],`,
+                    `\t\tqueryKey: ['${entityName}', '${rootMethod}', payload],`,
                     `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
                     `\t})`,
                     `}`
                 ].join('\n') 
                 : [
-                    `export const use${upperCase}API_${rootMethod} = () => {`,
+                    `export const use${rootMethod} = () => {`,
+                    `\tconst queryClient = useQueryClient()`,
                     `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
-                    `\t\tmutationFn: apiRequest(endpoint, '${rootMethod}')`,
+                    `\t\tmutationFn: apiRequest(endpoint, '${rootMethod}'),`,
+                    `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${entityName}'], exact: false }) }`,
                     `\t})`,
                     `}`
                 ].join('\n')
@@ -1124,13 +1128,17 @@ function generateQueries(lowerCase, upperCase) {
     for (const [currentPath, methods] of Object.entries(nestedMethods)) {
         for (const method of methods) {
             const fullMethodName = `${currentPath.replaceAll('/', '_')}_${method}`
+            scaffoldedMethods.push(fullMethodName)
             const fileName = path.resolve(controllerQueriesPath, `${fullMethodName}.ts`)
             const alreadyExists = fs.existsSync(fileName)
             if (alreadyExists) {
                 continue
             }
+
+            const nameForHook = (fullMethodName.charAt(0).toUpperCase() + fullMethodName.slice(1)).replaceAll('_', '');
+
             fs.writeFileSync(fileName, [
-                `import { ${method === 'GET' ? 'useQuery' : 'useMutation'} } from '@tanstack/react-query'`,
+                `import { ${method === 'GET' ? 'useQuery' : 'useMutation, useQueryClient' } } from '@tanstack/react-query'`,
                 `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
                 `import { apiRequest } from '@${config.paths.clientUtils}'`,
                 '',
@@ -1140,24 +1148,39 @@ function generateQueries(lowerCase, upperCase) {
                 ``,
                 method === 'GET' 
                     ? [
-                        `export const use${upperCase}API_${fullMethodName} = (payload: Method['payload']) => {`,
+                        `export const use${nameForHook} = (payload: Method['payload']) => {`,
                         `\treturn useQuery<Method['response'], Method['error']>({`,
-                        `\t\tqueryKey: [endpoint, payload],`,
+                        `\t\tqueryKey: ['${entityName}', ${currentPath.split('/').map(x => `'${x}'`).join(', ')}, payload],`,
                         `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
                         `\t})`,
                         `}`
                     ].join('\n') 
                     : [
-                        `export const use${upperCase}API_${fullMethodName} = () => {`,
+                        `export const use${nameForHook} = () => {`,
+                        `\tconst queryClient = useQueryClient()`,
                         `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
-                        `\t\tmutationFn: apiRequest(endpoint, '${method}')`,
+                        `\t\tmutationFn: apiRequest(endpoint, '${method}'),`,
+                        `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${entityName}'], exact: false }) }`,
                         `\t})`,
                         `}`
                     ].join('\n')
             ].join('\n'))
 
         }
-    }   
+    }
+    
+    const allQueryFiles = fs.readdirSync(controllerQueriesPath, { withFileTypes: true }).filter(x => x.isFile())
+    const deprecatedQueries = allQueryFiles.filter(x => scaffoldedMethods.every(scaffolded => !x.name.startsWith(scaffolded)))
+
+    for (const deprecated of deprecatedQueries) {
+        fs.rmSync(path.resolve(controllerQueriesPath, deprecated))
+    }
+
+    fs.writeFileSync(path.resolve(controllerQueriesPath, 'index.ts'), scaffoldedMethods.map(x => `export * from './${x}'`).join('\n'))
+
+    const indexPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`)
+    fs.writeFileSync(path.resolve(indexPath, 'index.ts'), `export * as ${upperCase}Queries from './queries'`)
+
 }
 
 

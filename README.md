@@ -4,34 +4,18 @@
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt)
 
-# What
+# TL;DR 🕰
 
-Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included. 
+You can scaffold **safe runtime-validated production-ready server modules** with **DDD-inspired structure** and **ready-to-use React Queries** **in one CLI command**. Fully **wired, editable**, and modules are **easily usable as Server Actions** — no boilerplate.
 
-Build full-stack features in Next.js without boilerplate. ⚡
+# What and Why
 
-# TL;DR
+Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included to build full-stack features in Next.js without boilerplate. ⚡
 
-One command:
-
-`npx nzmt crud-api user`
-
-Gives you:
-
-- entity and stores (Prisma and in-memory)
-- fully typed API routes
-- services (for Server Actions)
-- Zod validation
-- React Query hooks
-
-All wired together and fully editable. No boilerplate. See `Quick start with Prisma` for a full working example.
-
-# Why
-
-- ☕ Keep using plain Next.js — just faster and cleaner. Skip the moment when some “helpful” framework fights you, making you wonder if coding it yourself would’ve been easier.
+- ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
-- ✨ DI, Zod validation, project structure, handy API controllers and Server actions out of the box.
-- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger — and yes, it’s fun. (Well, not *literally* at the snap of a finger — that’s just marketing, to be honest. You still need to run one CLI command.)
+- ✨ DI, handy API controllers and a bunch of other cool things out of the box aimed at improving your DX.
+- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger. (Well, not *literally* at the snap of a finger — that’s just marketing, to be honest. You still need to run one CLI command.)
 
 # Quick start with Prisma
 
@@ -106,26 +90,25 @@ And after one CLI command and few tweaks you can use your React query hooks or S
 Schema: Client → React Query → API → Controller → Service → Store → DB
 ```
 
-Everything is already scaffolded for you, just import it and use! ✨
+Everything is already scaffolded and grouped in handy namespace for you, just import it and use! Even invalidations are working out of the box (though you can modify scaffolded queries any way you want)! ✨
 
 ```tsx
 'use client'
 
-import { useUserAPI_GET } from "@/client/shared/queries/user-controller/GET";
-import { useUserAPI_POST } from "@/client/shared/queries/user-controller/POST";
+import { UserQueries } from "@/client/shared/queries/user";
 
 export default function Home() {
-  const { mutate: addUser } = useUserAPI_POST()
-  const { data, isFetching } = useUserAPI_GET({ query: {} })
+  const { mutate: addUser } = UserQueries.usePOST()
+  const { data, isFetching } = UserQueries.useGET({ query: {} })
 
-  const addGreg = () => {
-    addUser({ body: { payload: { name: 'Greg' } } })
+  const addColinZeal = () => {
+    addUser({ body: { payload: { name: 'Colin Zeal' } } })
   }
 
   return (
     <div>
-      <button onClick={addGreg}>
-        Add Greg
+      <button onClick={addColinZeal}>
+        Add Mr. Zeal
       </button>
       
       {isFetching ? 'Loading users...' : JSON.stringify(data)}
@@ -135,7 +118,7 @@ export default function Home() {
 
 ```
 
-### How to use server actions
+### How to use server modules as server actions
 
 ```
 Schema: Server Action → Service → Store → DB
@@ -150,6 +133,11 @@ import { fromDI } from "@/server/di"
 import type { UserService } from "@/server/services/user"
 
 export default async function() {
+    /**
+     * FYI: `fromDI` argument is strongly typed and
+     * this type automatically updates after you scaffold
+     * anything. Cool, right?
+     */ 
     const userService = fromDI<UserService>('UserService')
 
     const driver8 = await userService.getDetails({ 
@@ -165,6 +153,14 @@ export default async function() {
 
 # Common questions
 
+## Can I tweak scaffolded files?
+
+Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code.
+
+If you need to tweak something, NZMT won’t get in your way. Your changes are preserved on subsequent generations. For example, if you modify a generated query and regenerate later, your edits stay intact.
+
+NZMT is designed for a plug-and-play experience — everything works out of the box. At the same time, it’s just a set of helpers to turn Zod schemas into service, store, and controller contracts, with a powerful scaffolder. No magic here — all code is yours to modify.
+
 ## Do I really need to understand DI and other fancy concepts to use NZMT?
 
 No. NZMT provides you safe and intuitive facade above `inversifyjs` and automatically registers dependencies. To get an instance you just use `fromDI` function with strongly typed keys in any place of your server code like this:
@@ -172,10 +168,6 @@ No. NZMT provides you safe and intuitive facade above `inversifyjs` and automati
 ```tsx
 const userService = fromDI<UserService>('UserService')
 ```
-
-## Can I tweak scaffolded files?
-
-Yes — everything is fully editable, including configuration. You can think of NZMT as shadcn-style approach for server-side logic — scaffold, then fully own the code. 
 
 ## Why data layer modules are called `Stores` and not `Repositories`?
 
@@ -200,7 +192,7 @@ P.S. In general, you remain within plain Next.js.
 
 ## Why not use Nest or tRPC?
 
-Again, you can use whatever you want, God bless you.
+Still you can use whatever you want, God bless you.
 
 `NZMT` sits between `tRPC` and `NestJS`:
 
@@ -211,6 +203,7 @@ But:
 - no framework lock-in
 - no magic runtime
 - full control over your code
+- no new layers of client-server interaction
 
 Just better Next.js.
 
