@@ -15,7 +15,7 @@ Next Zod Modules Toolkit. Next.js tools you actually missed + a scaffolder for s
 - ☕ Keep using plain Next.js — just faster and cleaner.
 - 🧙 Focus on your domain logic without drowning in full-blown DDD.
 - ✨ DI, handy API controllers and a bunch of other cool things out of the box aimed at improving your DX.
-- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger. (Well, not *literally* at the snap of a finger — that’s just marketing, to be honest. You still need to run one CLI command.)
+- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger. (Well, not *literally* at the snap of a finger — that’s just a marketing, to be honest. You still need to run one CLI command.)
 
 # Quick start with Prisma
 
@@ -55,7 +55,7 @@ This command generates:
 
 4. Import and set up there the necessary Prisma adapter in `/server/infrastructure/prisma/client.ts`
 
-## Example 1. CRUD for `User` entity with API route handlers and Server Actions
+## Example 1. CRUD for `User` entity with API React queries and Server Actions
 
 Assuming you have `User` prisma schema.
 
