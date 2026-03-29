@@ -23,7 +23,7 @@ Assuming you have a Next.js project with a generated Prisma client, and configur
 
 ## Setup phase
 
-1. Install NZMT and dependencies:
+1. Install NZMT with peer dependencies:
 
 ```bash
 npm i inversify zod reflect-metadata @alevnyacow/nzmt
@@ -55,7 +55,7 @@ This command generates:
 
 4. Import and set up there the necessary Prisma adapter in `/server/infrastructure/prisma/client.ts`
 
-## Example 1. CRUD for `User` entity with API React queries and Server Actions
+## Example 1. CRUD for `User` entity with React queries and Server Actions
 
 Assuming you have `User` prisma schema.
 
@@ -76,7 +76,7 @@ This command generates:
 
 Everything is wired automatically via DI — no manual setup needed.
 
-2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` (static `schema` field)
+2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` (static `schema` field).
 
 3. Tweak `UserStore` schemas if needed in scaffolded `/server/stores/users/user.store.ts`.
 
