@@ -133,7 +133,7 @@ export default async function Page() {
 | `npx nzmt crud-api <name>` | CRUD via Server Actions and React Query hooks. |
 | `npx nzmt crud-service <name>` | CRUD via Server Actions (no Controllers, API Routes and React Query hooks). |
 | `npx nzmt se <name>` | **s**tored **e**ntity: entity + store (contracts linked). |
-| `npx nzmt rq` | API **r**outes and React **q**eries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
+| `npx nzmt rq` | API **r**outes and React **q**ueries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
 
 ## Single module scaffolding
 
