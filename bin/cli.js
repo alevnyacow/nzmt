@@ -403,13 +403,14 @@ function initPrisma() {
     )
 }
 
-function initAPIGuards() {
+function initEndpointGuards() {
     const config = loadConfig()
     const endpointGuardsFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'endpoint-guards')
     fs.mkdirSync(endpointGuardsFolder, { recursive: true })
 
     fs.writeFileSync(path.resolve(endpointGuardsFolder, 'endpoint-guards.ts'), [
-        `import { Controller } from '@alevnyacow/nzmt'`,
+        `import type { Controller } from '@alevnyacow/nzmt'`,
+        '',
         `export class EndpointGuards {`,
         `\tdummyGuard: Controller.Guard = async () => { return undefined }`,
         `}`
@@ -489,7 +490,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     initSharedErrors()
     initPrisma()
     initLogger()
-    initAPIGuards()
+    initEndpointGuards()
 
     process.exit(0)
 }
@@ -1059,7 +1060,7 @@ function generateController(upperCase, lowerCase, crudService) {
         ``,
         `\tprivate readonly endpoints = Controller.endpoints(`,
         `\t\t${lowerCase}ControllerMetadata,`,
-        '\t\t{ onErrorHandlers: [this.logger.error] }',
+        '\t\t{ onErrorHandlers: [this.logger.error], guards: [] }',
         '\t)',
         ``,
         crudService ? [
