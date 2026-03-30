@@ -110,7 +110,7 @@ function createDefaultConfig() {
                 infrastructure: '/server/infrastructure',
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
-                sharedErrors: './shared/errors',
+                sharedErrors: '/shared/errors',
                 queries: '/client/shared/queries',
                 clientUtils: '/client/shared/utils'
             },
@@ -130,7 +130,7 @@ function createDefaultConfig() {
                 infrastructure: '/server/infrastructure',
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
-                sharedErrors: './shared/errors',
+                sharedErrors: '/shared/errors',
                 queries: '/client/shared/queries',
                 clientUtils: '/client/shared/utils'
             }
