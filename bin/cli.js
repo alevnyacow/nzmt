@@ -1109,10 +1109,11 @@ function generateController(upperCase, lowerCase, crudService) {
     )
 }
 
-function generateAPIRoutes(lowerCase, upperCase) {
+function generateAPIRoutes(lowerCase, upperCase, entity) {
+    const requiredEntity = entity || entityName
     const projectRoot = findProjectRoot()
     const fileText = fs.readFileSync(
-        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, entityName, `${entityName}.controller.ts`),
+        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, requiredEntity, `${requiredEntity}.controller.ts`),
         'utf-8'
     )
 
@@ -1130,13 +1131,13 @@ function generateAPIRoutes(lowerCase, upperCase) {
         return acc
     }, {})
 
-    const controllerHandlersRootPath = path.resolve(projectRoot, config.coreFolder, 'app', 'api', `${entityName}-controller`)
+    const controllerHandlersRootPath = path.resolve(projectRoot, config.coreFolder, 'app', 'api', `${requiredEntity}-controller`)
     
     fs.mkdirSync(controllerHandlersRootPath, { recursive: true })
 
     if (rootMethods.length) {
         fs.writeFileSync(path.resolve(controllerHandlersRootPath, 'route.ts'), [
-            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${entityName}'`,
+            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${requiredEntity}'`,
             `import { fromDI } from '@${config.paths.di}'`,
             '',
             `const controller = fromDI<${upperCase}Controller>('${upperCase}Controller')`,
@@ -1149,7 +1150,7 @@ function generateAPIRoutes(lowerCase, upperCase) {
         const nestedFolder = path.resolve(controllerHandlersRootPath, currentPath)
         fs.mkdirSync(nestedFolder, { recursive: true })
         fs.writeFileSync(path.resolve(nestedFolder, 'route.ts'), [
-            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${entityName}'`,
+            `import type { ${upperCase}Controller } from '@${config.paths.controllers}/${requiredEntity}'`,
             `import { fromDI } from '@${config.paths.di}'`,
             '',
             `const controller = fromDI<${upperCase}Controller>('${upperCase}Controller')`,
@@ -1159,11 +1160,12 @@ function generateAPIRoutes(lowerCase, upperCase) {
     }   
 }
 
-function generateQueries(lowerCase, upperCase) {
+function generateQueries(lowerCase, upperCase, entity) {
+    const requiredEntity = entity || entityName
     const projectRoot = findProjectRoot()
 
     const fileText = fs.readFileSync(
-        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, entityName, `${entityName}.controller.ts`),
+        path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`, requiredEntity, `${requiredEntity}.controller.ts`),
         'utf-8'
     )
 
@@ -1181,7 +1183,7 @@ function generateQueries(lowerCase, upperCase) {
         return acc
     }, {})
 
-    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`, 'endpoints')
+    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${requiredEntity}`, 'endpoints')
     let scaffoldedMethods = []
 
     fs.mkdirSync(controllerQueriesPath, { recursive: true })
@@ -1198,18 +1200,18 @@ function generateQueries(lowerCase, upperCase) {
         }
         fs.writeFileSync(fileName, [
             `import { ${rootMethod === 'GET' ? 'useQuery' : 'useMutation, useQueryClient'} } from '@tanstack/react-query'`,
-            `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
+            `import type { ${upperCase}API } from '@${config.paths.controllers}/${requiredEntity}'`,
             `import { apiRequest } from '@${config.paths.clientUtils}'`,
             '',
             `type Method = ${upperCase}API['endpoints']['${rootMethod}']`,
             ``,
-            `const endpoint = '/api/${entityName}-controller'`,
+            `const endpoint = '/api/${requiredEntity}-controller'`,
             ``,
             rootMethod === 'GET' 
                 ? [
                     `export const use${rootMethod} = (payload: Method['payload']) => {`,
                     `\treturn useQuery<Method['response'], Method['error']>({`,
-                    `\t\tqueryKey: ['${entityName}', '${rootMethod}', payload],`,
+                    `\t\tqueryKey: ['${requiredEntity}', '${rootMethod}', payload],`,
                     `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
                     `\t})`,
                     `}`
@@ -1219,7 +1221,7 @@ function generateQueries(lowerCase, upperCase) {
                     `\tconst queryClient = useQueryClient()`,
                     `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
                     `\t\tmutationFn: apiRequest(endpoint, '${rootMethod}'),`,
-                    `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${entityName}'], exact: false }) }`,
+                    `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${requiredEntity}'], exact: false }) }`,
                     `\t})`,
                     `}`
                 ].join('\n')
@@ -1240,18 +1242,18 @@ function generateQueries(lowerCase, upperCase) {
 
             fs.writeFileSync(fileName, [
                 `import { ${method === 'GET' ? 'useQuery' : 'useMutation, useQueryClient' } } from '@tanstack/react-query'`,
-                `import type { ${upperCase}API } from '@${config.paths.controllers}/${entityName}'`,
+                `import type { ${upperCase}API } from '@${config.paths.controllers}/${requiredEntity}'`,
                 `import { apiRequest } from '@${config.paths.clientUtils}'`,
                 '',
                 `type Method = ${upperCase}API['endpoints']['${fullMethodName}']`,
                 ``,
-                `const endpoint = '/api/${entityName}-controller/${currentPath}'`,
+                `const endpoint = '/api/${requiredEntity}-controller/${currentPath}'`,
                 ``,
                 method === 'GET' 
                     ? [
                         `export const use${nameForHook} = (payload: Method['payload']) => {`,
                         `\treturn useQuery<Method['response'], Method['error']>({`,
-                        `\t\tqueryKey: ['${entityName}', ${currentPath.split('/').map(x => `'${x}'`).join(', ')}, payload],`,
+                        `\t\tqueryKey: ['${requiredEntity}', ${currentPath.split('/').map(x => `'${x}'`).join(', ')}, payload],`,
                         `\t\tqueryFn: () => apiRequest(endpoint, 'GET')(payload)`,
                         `\t})`,
                         `}`
@@ -1261,7 +1263,7 @@ function generateQueries(lowerCase, upperCase) {
                         `\tconst queryClient = useQueryClient()`,
                         `\treturn useMutation<Method['response'], Method['error'], Method['payload']>({`,
                         `\t\tmutationFn: apiRequest(endpoint, '${method}'),`,
-                        `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${entityName}'], exact: false }) }`,
+                        `\t\tonSuccess: () => { queryClient.invalidateQueries({ queryKey: ['${requiredEntity}'], exact: false }) }`,
                         `\t})`,
                         `}`
                     ].join('\n')
@@ -1279,7 +1281,7 @@ function generateQueries(lowerCase, upperCase) {
 
     fs.writeFileSync(path.resolve(controllerQueriesPath, 'index.ts'), scaffoldedMethods.map(x => `export * from './${x}'`).join('\n'))
 
-    const indexPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`)
+    const indexPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${requiredEntity}`)
     fs.writeFileSync(path.resolve(indexPath, 'index.ts'), `export * as ${upperCase}Queries from './endpoints'`)
 
 }
@@ -1295,7 +1297,17 @@ if (command === 'queries') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
 
     generateQueries(lowerCase, upperCase)
+}
 
+if (command.toLowerCase() === 'routes-with-queries' || command === 'rq') {
+    const projectRoot = findProjectRoot()
+    const controllersFolder = path.resolve(projectRoot, `${config.coreFolder}${config.paths.controllers}`)
+    const controllerEntities = fs.readdirSync(controllersFolder, { withFileTypes: true }).filter(x => x.isDirectory()).map(x => x.name)
+    for (const entity of controllerEntities) {
+        var [lowerCase, upperCase] = camelizeVariants(entity)
+        generateAPIRoutes(lowerCase, upperCase, entity)
+        generateQueries(lowerCase, upperCase, entity)
+    }
 }
 
 if (command.toLowerCase() === 'controller' || command === 'c') {
@@ -1329,3 +1341,4 @@ if (command.toLowerCase() === 'crud-api') {
     generateQueries(lowerCase, upperCase)
     process.exit(0)
 }
+
