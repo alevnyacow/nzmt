@@ -15,14 +15,17 @@ Get **a DDD-inspired architecture with a contract-first approach** — and Serve
 
 **API, services, stores, entities, validation, and React Query hooks — all generated for you.** No framework. No lock-in. Just production-ready Next.js.
 
-# <p align="center">TL;DR</p>
+# TL;DR
 
-- initialize NZMT once
-- run the scaffolder (e.g. `npx nzmt crud-api user`)
-- tweak a few files
-- get ready-to-use React Query hooks and a backend usable via Server Actions
+1\. initialize NZMT once
 
-# <p align="center">Quick start with Prisma</p>
+2\. run the scaffolder (e.g. `npx nzmt crud-api user`)
+
+3\. tweak a few files
+
+4\. get ready-to-use React Query hooks and a DDD-inspired backend usable via Server Actions
+
+# Quick start with Prisma
 
 ## Setup
 
@@ -148,7 +151,7 @@ export default async function Page() {
 }
 ```
 
-# <p align="center">FAQ</p>
+# FAQ
 
 ## What does DDD-inspired mean?
 
