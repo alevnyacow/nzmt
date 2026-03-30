@@ -489,6 +489,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     initSharedErrors()
     initPrisma()
     initLogger()
+    initAPIGuards()
 
     process.exit(0)
 }
