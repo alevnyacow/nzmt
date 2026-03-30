@@ -92,7 +92,9 @@ So, after one CLI command and few tweaks you can use your React query hooks or S
 Schema: Client → React Query → API → Controller → Service → Store → DB
 ```
 
-Everything is already scaffolded and grouped in handy namespace for you, just import it and use! Even invalidations are working out of the box (though you can modify scaffolded queries any way you want)! ✨
+Everything is already scaffolded and grouped in handy namespace for you, just import it and use! ✨
+
+Even invalidations are working out of the box (though you can modify scaffolded queries any way you want). 
 
 ```tsx
 'use client'
