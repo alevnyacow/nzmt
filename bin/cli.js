@@ -1273,7 +1273,7 @@ function generateQueries(lowerCase, upperCase, entity) {
     }
     
     const allQueryFiles = fs.readdirSync(controllerQueriesPath, { withFileTypes: true }).filter(x => x.isFile())
-    const deprecatedQueries = allQueryFiles.filter(x => scaffoldedMethods.every(scaffolded => !x.name.startsWith(scaffolded)))
+    const deprecatedQueries = allQueryFiles.filter(x => scaffoldedMethods.every(scaffolded => !x.name.startsWith(scaffolded))).map(x => x.name)
 
     for (const deprecated of deprecatedQueries) {
         fs.rmSync(path.resolve(controllerQueriesPath, deprecated))

@@ -1,6 +1,6 @@
 {
   "name": "@alevnyacow/nzmt",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "Next Zod Modules Toolkit",
   "keywords": ["next", "full-stack", "server", "backend", "cli", "scaffolder", "zod", "rest", "contract programming", "react-query", "ddd", "domain-driven"],
   "repository": {
