@@ -242,7 +242,7 @@ The behavior of all server modules in NZMT is governed by Zod schemas. Function 
 
 ## Can I tweak scaffolded files?
 
-Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code. Moreover, in most of the cases your changes are preserved on subsequent generations. For example, if you modify a generated query and regenerate later, your edits stay intact.
+Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code. Moreover, in most of the cases your changes are preserved on subsequent generations. For example, if you modify a generated query and run `npx nzmt rq` later, your edits stay intact.
 
 ## Do I really need to understand DI and other fancy concepts to use NZMT?
 
