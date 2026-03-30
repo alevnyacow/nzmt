@@ -176,7 +176,7 @@ A “Repository” is a specific design pattern for managing data. NZMT prefers 
 
 ## Why not use Nest or tRPC?
 
-`NZMT` combines the best of both worlds while staying in plain Next.js:
+`NZMT` combines the best of both worlds in one package while staying in plain Next.js:
 
 - From tRPC — type safety and developer experience
 - From NestJS — structured architecture (but more DDD-inspired) with intuitive DI
