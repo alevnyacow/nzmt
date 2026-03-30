@@ -403,21 +403,21 @@ function initPrisma() {
     )
 }
 
-function initEndpointGuards() {
+function initGuards() {
     const config = loadConfig()
-    const endpointGuardsFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'endpoint-guards')
+    const endpointGuardsFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'guards')
     fs.mkdirSync(endpointGuardsFolder, { recursive: true })
 
-    fs.writeFileSync(path.resolve(endpointGuardsFolder, 'endpoint-guards.ts'), [
+    fs.writeFileSync(path.resolve(endpointGuardsFolder, 'guards.ts'), [
         `import type { Controller } from '@alevnyacow/nzmt'`,
         '',
-        `export class EndpointGuards {`,
+        `export class Guards {`,
         `\tdummyGuard: Controller.Guard = async () => { return undefined }`,
         `}`
     ].join('\n'))
 
     fs.writeFileSync(path.resolve(endpointGuardsFolder, 'index.ts'), [
-        `export * from './endpoint-guards'`
+        `export * from './guards'`
     ].join('\n'))
 
     // Update DI
@@ -427,13 +427,13 @@ function initEndpointGuards() {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { EndpointGuards } from '@${config?.paths?.infrastructure}/endpoint-guards'`
+        `import { Guards } from '@${config?.paths?.infrastructure}/guards'`
     )
 
     insertAfterLineInFile(
         diEntriesPath,
         '// Infrastructure',
-        `\tEndpointGuards,`,
+        `\tGuards,`,
     )
 
 }
@@ -490,7 +490,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     initSharedErrors()
     initPrisma()
     initLogger()
-    initEndpointGuards()
+    initGuards()
 
     process.exit(0)
 }
@@ -971,12 +971,8 @@ function generateController(upperCase, lowerCase, crudService) {
     if (crudService && !injections.includes(crudService)) {
         injections = injections.concat(crudService)
     }
-    if (!injections.includes('Logger')) {
-        injections = injections.concat('Logger')
-    }
-    if (!injections.includes('EndpointGuards')) {
-        injections = injections.concat('EndpointGuards')
-    }
+
+    injections = ['Logger', 'Guards', ...injections.filter(x => x !== 'Logger' && x !== 'Guards')]
 
     const crudServiceLowercase = crudService ? crudService.substring(0, 1).toLowerCase() + crudService.substring(1) : undefined
 
