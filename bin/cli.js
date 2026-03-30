@@ -935,6 +935,9 @@ function generateController(upperCase, lowerCase, crudService) {
     if (crudService && !injections.includes(crudService)) {
         injections = injections.concat(crudService)
     }
+    if (!injections.includes('Logger')) {
+        injections = injections.concat('Logger')
+    }
 
     const crudServiceLowercase = crudService ? crudService.substring(0, 1).toLowerCase() + crudService.substring(1) : undefined
 
@@ -1016,7 +1019,10 @@ function generateController(upperCase, lowerCase, crudService) {
         ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
         `\t) {}`,
         ``,
-        `\tprivate readonly endpoints = Controller.endpoints(${lowerCase}ControllerMetadata)`,
+        `\tprivate readonly endpoints = Controller.endpoints(',
+        '\t\t${lowerCase}ControllerMetadata,`,
+        '\t\t{ onErrorHandlers: [this.logger.error] }',
+        '\t)',
         ``,
         crudService ? [
             `\tGET = this.endpoints('GET', async (x) => {`,
