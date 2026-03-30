@@ -648,13 +648,13 @@ function generateEntity(upperCase) {
 
     const body = [
         "import z from 'zod'",
-        `import { ValueObjects } from '@${config?.paths?.valueObjects}/identifier'`,
+        `import { Identifier } from '@${config?.paths?.valueObjects}/identifier'`,
         "",
         `export type ${upperCase}Model = z.infer<typeof ${upperCase}.schema>`,
         "",
         `export class ${upperCase} {`,
         "\tstatic schema = z.object({",
-        "\t\tid: ValueObjects.Identifier.schema,",
+        "\t\tid: Identifier.schema,",
         fields.length ? 
             fields.map(([fieldName, description]) => {
                 return `\t\t${fieldName}: z.${description.split('.').join('().')}(),`
