@@ -66,7 +66,7 @@ Edit scaffolded `/server/infrastructure/prisma/client.ts` file
 
 ## Making full-stack CRUD for `User` entity with React queries and Server Actions
 
-Assuming you have `User` prisma schema.
+Assuming you have some `User` prisma schema.
 
 ```bash
 npx nzmt crud-api user
