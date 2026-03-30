@@ -110,6 +110,7 @@ function createDefaultConfig() {
                 infrastructure: '/server/infrastructure',
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
+                sharedErrors: './shared/errors',
                 queries: '/client/shared/queries',
                 clientUtils: '/client/shared/utils'
             },
@@ -129,11 +130,26 @@ function createDefaultConfig() {
                 infrastructure: '/server/infrastructure',
                 entities: '/shared/entities',
                 valueObjects: '/shared/value-objects',
+                sharedErrors: './shared/errors',
                 queries: '/client/shared/queries',
                 clientUtils: '/client/shared/utils'
             }
         }, null, '\t'))
     }
+}
+
+function initSharedErrors() { 
+    const config = loadConfig()
+    const folder = path.resolve(process.cwd(), `${config.coreFolder}${config.paths.sharedErrors}`)
+    fs.mkdirSync(folder, { recursive: true })
+    
+    fs.writeFileSync(path.resolve(folder, 'shared-error-codes.ts'), [
+        "export enum CommonErrorCodes {",
+        "\tNO_DATA_WAS_FOUND = 'COMMON___NO_DATA_WAS_FOUND'",
+        "}"
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, 'index.ts'), "export * from './shared-error-codes'")
 }
 
 function initVO() {
@@ -436,6 +452,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     initDI()
     initClientUtils()
     initVO()
+    initSharedErrors()
     initPrisma()
     initLogger()
 
@@ -983,9 +1000,10 @@ function generateController(upperCase, lowerCase, crudService) {
     // Body
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.controller.ts`), [
-        `import { Controller } from '@alevnyacow/nzmt'`,
         `import { injectable, inject } from 'inversify'`,
+        `import { Controller } from '@alevnyacow/nzmt'`,
         `import { DITokens } from '@${config?.paths?.di}'`,
+        crudService ? `import { CommonErrorCodes } from '@${config?.paths?.sharedErrors}'` : undefined,
         `import { ${lowerCase}ControllerMetadata } from './${entityName}.controller.metadata'`,
         ...importInjections,
         ``,
@@ -1008,7 +1026,7 @@ function generateController(upperCase, lowerCase, crudService) {
             ``,
             `\tdetails_GET = this.endpoints('details_GET', async (payload, { endpointError }) => {`,
             `\t\tconst details = await this.${crudServiceLowercase}.getDetails(payload)`,
-            `\t\tif (!details) { throw endpointError('No data was found', 404) }`,
+            `\t\tif (!details) { throw endpointError(CommonErrorCodes.NO_DATA_WAS_FOUND, 404) }`,
             `\t\treturn details`,
             `\t})`,
             ``,
