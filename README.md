@@ -11,68 +11,43 @@
 
 Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**.
 
-Get **a DDD-inspired architecture with a contract-first approach** — and Server Actions working out of the box.
+Get **a DDD-inspired architecture with a contract-first approach** — and Server Actions working out of the box. NZMT also comes with useful infrastructure like DI, logging, unified errors, and endpoint guards for your scaffolded modules. Batteries included!
 
 **API, services, stores, entities, validation, and React Query hooks — all generated for you.** No framework. No lock-in. Just production-ready Next.js.
 
+
 # TL;DR
 
-1\. initialize NZMT once
-
-2\. run the scaffolder (e.g. `npx nzmt crud-api user`)
-
-3\. tweak a few files
-
-4\. get ready-to-use React Query hooks and a DDD-inspired backend usable via Server Actions
+Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready DDD-inspired backend usable via Server Actions with ready-to-use React Query hooks.
 
 # Quick start with Prisma
 
+Assuming you have 
+
+- `Next.js` project with a generated `Prisma` client
+- some `User` schema in your `Prisma` client
+- enabled `experimentalDecorators` and `emitDecoratorMetadata` in `compilerOptions` section of `tsconfig.json`
+- configured `@tanstack/react-query`
+
 ## Setup
 
-Assuming you have a Next.js project with a generated Prisma client, and configured `@tanstack/react-query`:
-
-### 1. Install
-
 ```bash
+# install NZMT and peer dependencies
 npm i inversify zod reflect-metadata @alevnyacow/nzmt
-```
 
-### 2. Enable decorators in tsconfig.json
-
-```ts
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
-}
-```
-
-### 3. Initialize
-
-```bash
+# initialize NZMT with absolute prisma client path
 npx nzmt init prismaClientPath:@/generated/prisma/client
 ```
 
-This command takes absolute path to your Prisma client as input and generates:
+Then plug your `Prisma` adapter in scaffolded `/server/infrastructure/prisma/client.ts` file.
 
-- `nzmt.config.json` file
-- DI setup
-- infrastructure helpers
-
-### 4. Plug Prisma adapter
-
-Edit scaffolded `/server/infrastructure/prisma/client.ts` file
-
-## Making full-stack CRUD for `User` entity with React queries and Server Actions
-
-Assuming you have some `User` prisma schema.
+## Scaffolding CRUD operations for `User`
 
 ```bash
 npx nzmt crud-api user
 ```
 
-This command generates:
+This command scaffolds:
 
 - `User` entity
 - `UserStore` (with Prisma + RAM implementations)
@@ -80,8 +55,6 @@ This command generates:
 - `UserController` proxying UserService methods
 - `API routes` for UserController endpoints
 - `React Query hooks` for fetching UserController from client-side
-
-Everything is wired automatically via DI — no manual setup needed.
 
 Then tweak a few files:
 
