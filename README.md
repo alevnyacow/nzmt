@@ -186,7 +186,7 @@ foo: {
 ```ts
 // 'foo' is strongly-typed, don't worry
 foo = this.methods('foo', async ({ requestString }) => {
-  // all input and types are also infered
+  // all input and output types are also infered
   return Number(requestString)
 })
 ```
