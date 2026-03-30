@@ -15,26 +15,26 @@ Get **a DDD-inspired architecture with a contract-first approach** — and Serve
 
 **API, services, stores, entities, validation, and React Query hooks — all generated for you.** No framework. No lock-in. Just production-ready Next.js.
 
-## <p align="center">👀 TL;DR</p>
+# <p align="center">TL;DR</p>
 
 - initialize NZMT once
 - run the scaffolder (e.g. `npx nzmt crud-api user`)
 - tweak a few files
 - get ready-to-use React Query hooks and a backend usable via Server Actions
 
-## <p align="center">🎬 Quick start with Prisma</p>
+# <p align="center">Quick start with Prisma</p>
 
-### <p align="center">⚙️ Setup</p>
+## Setup
 
 Assuming you have a Next.js project with a generated Prisma client, and configured `@tanstack/react-query`:
 
-#### 1. Install
+### 1. Install
 
 ```bash
 npm i inversify zod reflect-metadata @alevnyacow/nzmt
 ```
 
-#### 2. Enable decorators in tsconfig.json
+### 2. Enable decorators in tsconfig.json
 
 ```ts
 {
@@ -45,7 +45,7 @@ npm i inversify zod reflect-metadata @alevnyacow/nzmt
 }
 ```
 
-#### 3. Initialize
+### 3. Initialize
 
 ```bash
 npx nzmt init prismaClientPath:@/generated/prisma/client
@@ -57,11 +57,11 @@ This command takes absolute path to your Prisma client as input and generates:
 - DI setup
 - infrastructure helpers
 
-#### 4. Plug Prisma adapter
+### 4. Plug Prisma adapter
 
 Edit scaffolded `/server/infrastructure/prisma/client.ts` file
 
-### <p align="center">🔍 Making full-stack CRUD for `User` entity with React queries and Server Actions</p>
+## Making full-stack CRUD for `User` entity with React queries and Server Actions
 
 Assuming you have `User` prisma schema.
 
@@ -88,7 +88,7 @@ Then tweak a few files:
 
 And after only one command and a few tweaks you have ready-to-use React Query hooks & Server Actions backend.
 
-### <p align="center">⚛️ Using scaffolded React query hooks</p>
+## Using scaffolded React query hooks
 
 ```
 Schema: Client → React Query → API → Controller → Service → Store → DB
@@ -120,7 +120,7 @@ export default function Page() {
 
 ```
 
-### <p align="center">🔼 Using scaffolded Service methods as Next server actions</p>
+## Using scaffolded Service methods as Next server actions
 
 ```
 Schema: Server Action → Service → Store → DB
@@ -148,7 +148,7 @@ export default async function Page() {
 }
 ```
 
-## <p align="center">❓ FAQ</p>
+# <p align="center">FAQ</p>
 
 ## What does DDD-inspired mean?
 
