@@ -1133,6 +1133,10 @@ function generateAPIRoutes(lowerCase, upperCase, entity) {
 
     const controllerHandlersRootPath = path.resolve(projectRoot, config.coreFolder, 'app', 'api', `${requiredEntity}-controller`)
     
+    if (fs.existsSync(controllerHandlersRootPath)) {
+        fs.rmdirSync(controllerHandlersRootPath)
+    }
+
     fs.mkdirSync(controllerHandlersRootPath, { recursive: true })
 
     if (rootMethods.length) {
