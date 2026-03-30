@@ -9,16 +9,16 @@
   <img src='https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt'></img>
 </p>
 
-Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**.
+Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**. 
 
-Get **a DDD-inspired architecture with a contract-first approach** — and Server Actions working out of the box. NZMT also comes with useful infrastructure like DI, logging, unified errors, and endpoint guards for your scaffolded modules. Batteries included!
+Get a DDD-inspired architecture with a contract-first approach out of the box. NZMT also comes with useful infrastructure like DI, logging, unified errors, and endpoint guards. 
 
-**API, services, stores, entities, validation, and React Query hooks — all generated for you.** No framework. No lock-in. Just production-ready Next.js.
+Batteries included!
 
 
 # TL;DR
 
-Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready DDD-inspired backend usable via Server Actions with ready-to-use React Query hooks.
+Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready backend usable via Server Actions with ready-to-use React Query hooks.
 
 # Quick start with Prisma
 
