@@ -4,7 +4,7 @@
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt)
 
-Scaffold full-stack modules in Next.js in seconds with Next **Zod Modules Toolkit (NZMT)**.
+Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**.
 
 Get **a DDD-inspired architecture with a contract-first approach** — and Server Actions working out of the box.
 
