@@ -4,34 +4,32 @@
 ![NPM License](https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt)
 ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt)
 
-# TL;DR 🕰
+Scaffold full-stack modules in Next.js in seconds with Next **Zod Modules Toolkit (NZMT)**.
 
-Scaffold production-ready server modules in Next.js with a single CLI command, which also generates ready-to-use React Queries. Modules work seamlessly with Server Actions out of the box.
+Get **a DDD-inspired architecture with a contract-first approach** — and Server Actions working out of the box.
 
-# What and Why
+**API, services, stores, entities, validation, and React Query hooks — all generated for you.** No framework. No lock-in. Just production-ready Next.js.
 
-Next Zod Modules Toolkit. 
+# 👀 How it works
 
-Next.js tools you actually missed + a scaffolder for server logic & client queries. **Not a framework.** Full-stack, batteries included. ⚡
+- initialize NZMT once
+- run the scaffolder (e.g. `npx nzmt crud-api user`)
+- tweak a few files
+- get ready-to-use React Query hooks and a backend usable via Server Actions
 
-- ☕ Keep using plain Next.js — just faster and cleaner.
-- 🧙 Focus on your domain logic without drowning in full-blown DDD.
-- ✨ DI, handy API controllers and a bunch of other cool things aimed at improving your DX out of the box.
-- 🪄 Services, controllers, client queries, and other programmer stuff appear at the snap of a finger.
-
-# Quick start with Prisma
+# 🎬 Quick start with Prisma
 
 Assuming you have a Next.js project with a generated Prisma client, and configured `@tanstack/react-query`:
 
-## Setup phase
+## ⚙️ Setup
 
-1. Install NZMT with peer dependencies:
+### 1. Install
 
 ```bash
 npm i inversify zod reflect-metadata @alevnyacow/nzmt
 ```
 
-2. Enable decorators in tsconfig.json
+### 2. Enable decorators in tsconfig.json
 
 ```ts
 {
@@ -42,26 +40,25 @@ npm i inversify zod reflect-metadata @alevnyacow/nzmt
 }
 ```
 
-3. Initialize NZMT with the absolute Prisma client path as a parameter
+### 3. Initialize
 
 ```bash
 npx nzmt init prismaClientPath:@/generated/prisma/client
 ```
 
-This command generates:
+This command takes absolute path to your Prisma client as input and generates:
 
 - `nzmt.config.json` file
-- DI infrastructure boilerplate
-- Prisma Client instance injected in DI
-- Some infrastructure helpers also already injected in DI
+- DI setup
+- infrastructure helpers
 
-4. Import and set up the necessary Prisma adapter in scaffolded `/server/infrastructure/prisma/client.ts` file.
+### 4. Plug Prisma adapter
 
-## Example 1. CRUD for `User` entity with React queries and Server Actions
+Edit scaffolded `/server/infrastructure/prisma/client.ts` file
+
+## 🔍 Making full-stack CRUD for `User` entity with React queries and Server Actions
 
 Assuming you have `User` prisma schema.
-
-1. Run NZMT scaffolder:
 
 ```bash
 npx nzmt crud-api user
@@ -78,41 +75,37 @@ This command generates:
 
 Everything is wired automatically via DI — no manual setup needed.
 
-2. Describe your entity in scaffolded `/shared/entities/user/user.entity.ts` file (static `schema` field).
+Then tweak a few files:
 
-3. Tweak `UserStore` schemas if needed in scaffolded `/server/stores/users/user.store.ts` file.
+- `/shared/entities/user/user.entity.ts` → entity schema
+- `/server/stores/users/user.store.ts` → store schemas (if default schemas do not fit your needs)
+- `/server/stores/users/user.store.prisma.ts` → map `UserStore` contracts to Prisma client contracts
 
-4. Describe how your `UserStore` contracts map to your `Prisma` client contracts in scaffolded `server/stores/users/user.store.prisma.ts` file (`mappers` object is already there for you with all types and functions, just implement them).
+👉 One command + few tweaks → ready-to-use React Query hooks & Server Actions backend.
 
-So, after one CLI command and few tweaks you can use your React query hooks or Server actions. 🪄
-
-### How to use React query hooks
+## ⚛️ Using scaffolded React query hooks
 
 ```
 Schema: Client → React Query → API → Controller → Service → Store → DB
 ```
-
-Everything is already scaffolded and grouped in handy namespace for you, just import it and use! ✨
-
-Even invalidations are working out of the box (though you can modify scaffolded queries any way you want). 
 
 ```tsx
 'use client'
 
 import { UserQueries } from "@/client/shared/queries/user";
 
-export default function Home() {
+export default function () {
   const { mutate: addUser } = UserQueries.usePOST()
   const { data, isFetching } = UserQueries.useGET({ query: {} })
 
-  const addColinZeal = () => {
-    addUser({ body: { payload: { name: 'Colin Zeal' } } })
+  const addRandomUser = () => {
+    addUser({ body: { payload: { name: `${Math.random()}` } } })
   }
 
   return (
     <div>
-      <button onClick={addColinZeal}>
-        Add Mr. Zeal
+      <button onClick={addRandomUser}>
+        New random user
       </button>
       
       {isFetching ? 'Loading users...' : JSON.stringify(data)}
@@ -122,13 +115,11 @@ export default function Home() {
 
 ```
 
-### How to use server modules as server actions
+## 🔼 Using scaffolded Service methods as Next server actions
 
 ```
 Schema: Server Action → Service → Store → DB
 ```
-
-Just get required instances from DI and use methods. That's all. ✨
 
 ```tsx
 'use server'
@@ -144,71 +135,55 @@ export default async function() {
      */ 
     const userService = fromDI<UserService>('UserService')
 
-    const driver8 = await userService.getDetails({ 
-        filter: { id: 'driver-8' } 
+    const user1 = await userService.getDetails({ 
+        filter: { id: 'user-1-id' } 
     })
 
-    return <div>
-        Take a break, {JSON.stringify(driver8)}
-        {JSON.stringify(driver8)}, take a break
-    </div>
+    return <div>{JSON.stringify(user1)}</div>
 }
 ```
 
-# Common questions
+# ❓ FAQ
+
+## What does DDD-inspired mean?
+
+NZMT puts your business domain first. Entities drive the architecture, so backend and frontend stay consistent, and all layers are generated from your entity contracts and schemas.
+
+## What does contract-first mean?
+
+The behavior of all server modules in NZMT is governed by Zod schemas. Function signatures and entity contracts are derived from these schemas. There is also automatic runtime validation to ensure that all data — function arguments and entity models — conform to their schemas.
 
 ## Can I tweak scaffolded files?
 
-Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code.
-
-If you need to tweak something, NZMT won’t get in your way. Your changes are preserved on subsequent generations. For example, if you modify a generated query and regenerate later, your edits stay intact.
-
-NZMT is designed for a plug-and-play experience — everything works out of the box. At the same time, it’s just a set of helpers to turn Zod schemas into service, store, and controller contracts, with a powerful scaffolder. No magic here — all code is yours to modify.
+Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code. Moreover, your changes are preserved on subsequent generations. For example, if you modify a generated query and regenerate later, your edits stay intact.
 
 ## Do I really need to understand DI and other fancy concepts to use NZMT?
 
-No. NZMT provides you safe and intuitive facade above `inversifyjs` and automatically registers dependencies. To get an instance you just use `fromDI` function with strongly typed keys in any place of your server code like this:
+No. NZMT handles dependency injection (DI) for you using `inversifyjs`. You don’t need to set it up manually.
+To get an instance of a service anywhere in your server code, just use:
 
 ```tsx
+import { fromDI } from '@/server/di'
+
 const userService = fromDI<UserService>('UserService')
 ```
 
+Here, `fromDI` is strongly typed — your IDE will give autocomplete automatically.
+
 ## Why data layer modules are called `Stores` and not `Repositories`?
 
-Good design is impossible without precise terminology. The definition of a "Repository" can vary depending on the terminology used. It’s frustrating when you’ve spent your whole life writing repositories, and then some smart aleck comes along and accuses you of having been writing, say, Data Access Objects all this time! In general, a "Repository" is simply a pattern for working with data. Often, what we really need isn’t a specific pattern, but a properly separated abstraction layer for data handling, which we can then adapt to our needs. That’s exactly why the names of the modules used for the Data Layer in NZMT are kept as abstract as possible, without tying them to any specific data-handling pattern. 
-
-This approach wasn’t invented here; it has already proven successful, for example, in Go.
-
-## Why not just use plain Next.js?
-
-You can.
-
-NZMT removes the repetitive parts:
-- validation
-- API wiring
-- client queries
-- service layer
-- data layer
-
-So you can focus on your logic while NZMT handles boring tech stuff like folder structure and contracts. 
-
-P.S. In general, you remain within plain Next.js.
+A “Repository” is a specific design pattern for managing data. NZMT prefers Stores — a simple, flexible abstraction for your data layer that can adapt to your needs regardless of the specific pattern. This approach helps to keep your code simple, and it has been successfully used in other languages, like Go.
 
 ## Why not use Nest or tRPC?
 
-Still you can use whatever you want, God bless you.
+`NZMT` combines the best of both worlds while staying in plain Next.js:
 
-`NZMT` sits between `tRPC` and `NestJS`:
+- From tRPC — type safety and developer experience
+- From NestJS — structured architecture (but more DDD-inspired) with intuitive DI
 
-- from tRPC — type safety and DX
-- from NestJS — structure and layering, but more DDD-inspired
+Plus:
 
-But:
-- no framework lock-in
-- no magic runtime
-- full control over your code
-- power of react-query for client-server requests
-- no new layers of client-server interaction
-
-Just better Next.js.
-
+- No framework lock-in
+- No magic runtime
+- Full control over your code
+- No extra client-server layers
