@@ -108,11 +108,11 @@ function createDefaultConfig() {
                 providers: '/server/providers',
                 controllers: '/server/controllers',
                 infrastructure: '/server/infrastructure',
-                entities: '/shared/entities',
-                valueObjects: '/shared/value-objects',
-                sharedErrors: '/shared/errors',
-                queries: '/client/shared/queries',
-                clientUtils: '/client/shared/utils'
+                entities: '/domain/entities',
+                valueObjects: '/domain/value-objects',
+                sharedErrors: '/domain/errors',
+                queries: '/ui/shared/queries',
+                clientUtils: '/ui/shared/utils'
             },
             store: {
                 prisma: {
@@ -128,11 +128,11 @@ function createDefaultConfig() {
                 providers: '/server/providers',
                 controllers: '/server/controllers',
                 infrastructure: '/server/infrastructure',
-                entities: '/shared/entities',
-                valueObjects: '/shared/value-objects',
-                sharedErrors: '/shared/errors',
-                queries: '/client/shared/queries',
-                clientUtils: '/client/shared/utils'
+                entities: '/domain/entities',
+                valueObjects: '/domain/value-objects',
+                sharedErrors: '/domain/errors',
+                queries: '/ui/shared/queries',
+                clientUtils: '/ui/shared/utils'
             }
         }, null, '\t'))
     }
