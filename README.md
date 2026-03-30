@@ -128,22 +128,22 @@ export default async function Page() {
 
 ## Complex scaffolding
 
-| Command | Description |
+| Command | Scaffolding result |
 |---------|-------------|
 | `npx nzmt crud-api <name>` | CRUD via Server Actions and React Query hooks. |
 | `npx nzmt crud-service <name>` | CRUD via Server Actions (no Controllers, API Routes and React Query hooks). |
-| `npx nzmt se <name>` | Generate **e**ntity + **s**tore (contracts linked). |
-| `npx nzmt rq` | Generate API **r**outes and React **q**eries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
+| `npx nzmt se <name>` | **s**tored **e**ntity: entity + store (contracts linked). |
+| `npx nzmt rq` | API **r**outes and React **q**eries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
 
 ## Single module scaffolding
 
-| Command | Description |Options|
+| Command | Scaffolding result |Options|
 |---------|-------------|-------|
-| `npx nzmt e <name>`  | Generate **e**ntity. ||
-| `npx nzmt vo <name>` | Generate **v**alue **o**bject. ||
-| `npx nzmt cs <name>`  | Generate **c**ustom **s**tore (all schemas are `z.object({})`). ||
-| `npx nzmt s <name>`  | Generate **s**ervice. |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
-| `npx nzmt c <name>`  | Generate **c**ontroller. |`i:UserService` will automatically inject `UserService`. `Logger` and `Guared` are injected by default regardless of `i:` option|
+| `npx nzmt e <name>`  | **e**ntity ||
+| `npx nzmt vo <name>` | **v**alue **o**bject ||
+| `npx nzmt cs <name>`  | **c**ustom **s**tore (all schemas are `z.object({})`) ||
+| `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
+| `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guared` are injected by default regardless of `i:` option|
 
 # FAQ
 
