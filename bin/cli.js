@@ -462,7 +462,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
         "\t},",
         "",
         "\tsearchPayload: {",
-        withEntity ? `\t\tlist: ${upperCase}.schema.omit({ id: true }),` : "\t\tlist: z.object({ }),",
+        withEntity ? `\t\tlist: ${upperCase}.schema.omit({ id: true }).partial(),` : "\t\tlist: z.object({ }),",
         withEntity ? `\t\tspecific: ${upperCase}.schema.pick({ id: true }),` : "\t\tspecific: z.object({ }),",
         "\t},",
         "",
