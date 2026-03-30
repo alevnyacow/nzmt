@@ -403,6 +403,40 @@ function initPrisma() {
     )
 }
 
+function initAPIGuards() {
+    const config = loadConfig()
+    const endpointGuardsFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'endpoint-guards')
+    fs.mkdirSync(endpointGuardsFolder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(endpointGuardsFolder, 'endpoint-guards.ts'), [
+        `import { Controller } from '@alevnyacow/nzmt'`,
+        `export class EndpointGuards {`,
+        `\tdummyGuard: Controller.Guard = async () => { return undefined }`,
+        `}`
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(endpointGuardsFolder, 'index.ts'), [
+        `export * from './endpoint-guards'`
+    ].join('\n'))
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { EndpointGuards } from '@${config?.paths?.infrastructure}/endpoint-guards'`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Infrastructure',
+        `\tEndpointGuards,`,
+    )
+
+}
+
 function initLogger() {
     const config = loadConfig()
     const loggerFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'logger')
@@ -937,6 +971,9 @@ function generateController(upperCase, lowerCase, crudService) {
     }
     if (!injections.includes('Logger')) {
         injections = injections.concat('Logger')
+    }
+    if (!injections.includes('EndpointGuards')) {
+        injections = injections.concat('EndpointGuards')
     }
 
     const crudServiceLowercase = crudService ? crudService.substring(0, 1).toLowerCase() + crudService.substring(1) : undefined
