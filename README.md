@@ -82,7 +82,7 @@ Everything is wired automatically via DI — no manual setup needed.
 
 Then tweak a few files:
 
-- `/shared/entities/user/user.entity.ts` → entity schema
+- `/domain/entities/user/user.entity.ts` → entity schema
 - `/server/stores/users/user.store.ts` → store schemas (if default schemas do not fit your needs)
 - `/server/stores/users/user.store.prisma.ts` → map `UserStore` contracts to Prisma client contracts
 
@@ -97,9 +97,9 @@ Schema: Client → React Query → API → Controller → Service → Store → 
 ```tsx
 'use client'
 
-import { UserQueries } from "@/client/shared/queries/user";
+import { UserQueries } from "@/ui/shared/queries/user";
 
-export default function () {
+export default function Page() {
   const { mutate: addUser } = UserQueries.usePOST()
   const { data, isFetching } = UserQueries.useGET({ query: {} })
 
@@ -132,7 +132,7 @@ Schema: Server Action → Service → Store → DB
 import { fromDI } from "@/server/di"
 import type { UserService } from "@/server/services/user"
 
-export default async function() {
+export default async function Page() {
     /**
      * FYI: `fromDI` argument is strongly typed and
      * this type automatically updates after you scaffold
