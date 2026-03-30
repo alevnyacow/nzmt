@@ -1115,7 +1115,7 @@ function generateQueries(lowerCase, upperCase) {
         return acc
     }, {})
 
-    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`, 'queries')
+    const controllerQueriesPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`, 'endpoints')
     let scaffoldedMethods = []
 
     fs.mkdirSync(controllerQueriesPath, { recursive: true })
@@ -1214,7 +1214,7 @@ function generateQueries(lowerCase, upperCase) {
     fs.writeFileSync(path.resolve(controllerQueriesPath, 'index.ts'), scaffoldedMethods.map(x => `export * from './${x}'`).join('\n'))
 
     const indexPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${entityName}`)
-    fs.writeFileSync(path.resolve(indexPath, 'index.ts'), `export * as ${upperCase}Queries from './queries'`)
+    fs.writeFileSync(path.resolve(indexPath, 'index.ts'), `export * as ${upperCase}Queries from './endpoints'`)
 
 }
 
