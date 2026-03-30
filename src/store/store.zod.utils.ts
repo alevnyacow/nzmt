@@ -7,7 +7,7 @@ import type {
     ZodType
 } from 'zod';
 import z from 'zod';
-import { Pagination } from '../entities/pagination.entity';
+import { Pagination } from '../value-objects/pagination.value-object';
 import { methods as moduleMethods } from '../zod-module.utils';
 import type {
     CRUD,

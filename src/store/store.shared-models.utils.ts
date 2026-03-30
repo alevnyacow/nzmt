@@ -1,4 +1,4 @@
-import type { PaginationModel } from '../entities/pagination.entity';
+import type { PaginationModel } from '../value-objects/pagination.value-object';
 
 export type CRUD<
     Models extends { list: unknown; detail: unknown },

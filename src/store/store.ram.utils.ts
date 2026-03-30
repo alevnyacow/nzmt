@@ -1,5 +1,5 @@
 import z from 'zod';
-import { Pagination } from '../entities/pagination.entity';
+import { Pagination } from '../value-objects/pagination.value-object';
 import type { CRUD, Types } from './store.shared-models.utils';
 import {
     type Contract,

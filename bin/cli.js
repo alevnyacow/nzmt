@@ -136,6 +136,41 @@ function createDefaultConfig() {
     }
 }
 
+function initVO() {
+    const config = loadConfig()
+    const voFolder = path.resolve(process.cwd(), `${config.coreFolder}${config.paths.valueObjects}`)
+    const identifierFolder = path.resolve(voFolder, 'identifier')
+
+    fs.mkdirSync(identifierFolder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(identifierFolder, 'identifier.value-object.ts'), [
+        "import { randomUUID } from 'node:crypto'",
+        "import z from 'zod'",
+        "",
+        "export type IdentifierModel = z.infer<typeof Identifier.schema>",
+        "",
+        "export class Identifier {",
+        "\tstatic schema = z.string().nonempty()",
+        "\t",
+        "\tprivate constructor(private readonly data: string) {}",
+        "\t",
+        "\tstatic create = (data: IdentifierModel) => {",
+        "\t\treturn new Identifier(Identifier.schema.parse(data))",
+        "\t}",
+        "\t",
+        "\tstatic get randomUUID() {",
+        "\t\treturn Identifier.create(randomUUID())",
+        "\t}",
+        "\t",
+        "\tget model(): IdentifierModel {",
+        "\t\treturn this.data",
+        "\t}",
+        "}"
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(identifierFolder, 'index.ts'), "export * from './identifier.value-object'")
+}
+
 function initDI() {
     const config = loadConfig()
     const diPath = config?.paths?.di
@@ -400,6 +435,7 @@ if (command.toLowerCase() === 'init' || command === 'i') {
     createDefaultConfig()
     initDI()
     initClientUtils()
+    initVO()
     initPrisma()
     initLogger()
 
@@ -612,7 +648,7 @@ function generateEntity(upperCase) {
 
     const body = [
         "import z from 'zod'",
-        "import { ValueObjects } from '@alevnyacow/nzmt'",
+        `import { ValueObjects } from '@${config?.paths?.valueObjects}/identifier'`,
         "",
         `export type ${upperCase}Model = z.infer<typeof ${upperCase}.schema>`,
         "",
