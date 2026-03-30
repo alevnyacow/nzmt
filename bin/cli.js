@@ -686,7 +686,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
 
 }
 
-if (command.toLowerCase() === 'store' || command === 's') {
+if (command.toLowerCase() === 'store' || command === 'cs') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateStores(lowerCase, upperCase)
     process.exit(0);
@@ -954,7 +954,7 @@ function generateService(lowerCase, upperCase, store) {
     )
 }
 
-if (command.toLowerCase() === 'service' || command === 'S') {
+if (command.toLowerCase() === 'service' || command === 's') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateService(lowerCase, upperCase, false)
     process.exit(0)

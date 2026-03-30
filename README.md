@@ -124,6 +124,27 @@ export default async function Page() {
 }
 ```
 
+# Scaffolder commands glossary
+
+## Complex scaffolding
+
+| Command | Description |
+|---------|-------------|
+| `npx nzmt crud-api <name>` | CRUD via Server Actions and React Query hooks. |
+| `npx nzmt crud-service <name>` | CRUD via Server Actions (no Controllers, API Routes and React Query hooks). |
+| `npx nzmt se <name>` | Generate **e**ntity + **s**tore (contracts linked). |
+| `npx nzmt rq` | Generate API **r**outes and React **q**eries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
+
+## Single module scaffolding
+
+| Command | Description |Options|
+|---------|-------------|-------|
+| `npx nzmt e <name>`  | Generate **e**ntity. ||
+| `npx nzmt vo <name>` | Generate **v**alue **o**bject. ||
+| `npx nzmt cs <name>`  | Generate **c**ustom **s**tore (all schemas are `z.object({})`). ||
+| `npx nzmt s <name>`  | Generate **s**ervice. |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
+| `npx nzmt c <name>`  | Generate **c**ontroller. |`i:UserService` will automatically inject `UserService`. `Logger` and `Guared` are injected by default regardless of `i:` option|
+
 # FAQ
 
 ## What does DDD-inspired mean?
