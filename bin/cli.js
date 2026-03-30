@@ -970,7 +970,7 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\tGET: {`,
             `\t\t\tquery: z.union([`,
             `\t\t\t\t// Request all items`,
-            `\t\t\t\t${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter`,
+            `\t\t\t\t${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter,`,
             '\t\t\t\t// Request specific page',
             `\t\t\t\tValueObjects.Pagination.schema.extend(${crudServiceLowercase}Metadata.schemas.getList.payload.shape.filter.shape),`,
             `\t\t\t]),`,
