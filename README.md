@@ -83,8 +83,8 @@ Everything is wired automatically via DI — no manual setup needed.
 Then tweak a few files:
 
 - `/domain/entities/user/user.entity.ts` → entity schema
-- `/server/stores/users/user.store.ts` → store schemas (if default schemas do not fit your needs)
-- `/server/stores/users/user.store.prisma.ts` → map `UserStore` contracts to Prisma client contracts
+- `/server/stores/user/user.store.ts` → store schemas (if default schemas do not fit your needs)
+- `/server/stores/user/user.store.prisma.ts` → map `UserStore` contracts to Prisma client contracts
 
 👉 One command + few tweaks → ready-to-use React Query hooks & Server Actions backend.
 
