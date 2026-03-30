@@ -184,7 +184,7 @@ foo: {
 2. **Implement it in the service class** (`service-name.service.ts`):
 
 ```ts
-// 'foo' is strongly-typed, don't worry
+// 'foo' string is strongly-typed, don't worry
 foo = this.methods('foo', async ({ requestString }) => {
   // all input and output types are also infered
   return Number(requestString)
