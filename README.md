@@ -143,7 +143,7 @@ export default async function Page() {
 | `npx nzmt vo <name>` | **v**alue **o**bject ||
 | `npx nzmt cs <name>`  | **c**ustom **s**tore (all schemas are `z.object({})`) ||
 | `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
-| `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guared` are injected by default regardless of `i:` option|
+| `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
 
 # FAQ
 
