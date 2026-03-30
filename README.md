@@ -145,6 +145,91 @@ export default async function Page() {
 | `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
 | `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
 
+# How to implement your own methods
+
+## Module contracts as Zod schemas
+
+Server module methods are described using Zod schemas. NZMT uses fancy word `metadata` for such contracts, so they can be found in separated files like `user.controller.metadata.ts` or `product.service.metadata.ts`. Besides runtime safety, they’re easy to reuse across layers—no need for separate DTOs.
+
+```ts
+// ...some service metadata schemas
+orderDetais: {
+  payload: Order.schema.pick({ 
+    name: true, 
+    createdDate: true 
+  }),
+  response: z.object({ 
+    user: User.schema, 
+    products: z.array(Product.schema.omit({ price: true }))
+  })
+}
+// ...some service metadata schemas
+```
+
+**All types and keys are infered, no need to worry about TypeScript.**
+
+## Services
+
+To add a method:
+
+1. **Describe it in metadata schemas** using Zod (`service-name.service.metadata.ts`):
+
+```ts
+foo: {
+  request: z.object({ requestString: z.string() }),
+  response: z.object({ responseNumber: z.number() })
+}
+```
+
+2. **Implement it in the service class** (`service-name.service.ts`):
+
+```ts
+// 'foo' is strongly-typed, don't worry
+foo = this.methods('foo', async ({ requestString }) => {
+  // all input and types are also infered
+  return Number(requestString)
+})
+```
+
+## Controllers
+
+Same idea and types inference, but metadata consists of `query`, `body`, and `response`.
+
+1. **Metadata** (`controller-name.controller.metadata.ts`): 
+
+```ts
+POST: {
+  query: z.object({ id: z.string() }),
+  body: z.object({ delta: z.number() }),
+  response: z.object({ success: z.boolean() })
+}
+```
+
+2. **Implementation** (`controller-name.controller.ts`):
+
+```ts
+// `query` and `body` are merged into a single payload
+POST = this.endpoints('POST', async ({ id, delta }) => {
+  return { success: true }
+})
+```
+
+This method can be used directly as a Next.js API route handler. If you examine generated API route files you will see something like this:
+
+```ts
+// api/user-controller/route.ts
+import { fromDI } from '@/server/di'
+import type { UserController } from '@/server/controllers'
+
+const controller = fromDI<UserController>('UserController')
+
+export const GET = controller.GET
+export const PUT = controller.PUT
+export const PATCH = controller.PATCH
+export const DELETE = controller.DELETE
+```
+
+
 # FAQ
 
 ## What does DDD-inspired mean?
