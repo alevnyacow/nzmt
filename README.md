@@ -219,7 +219,7 @@ This method can be used directly as a Next.js API route handler. If you examine 
 ```ts
 // api/user-controller/route.ts
 import { fromDI } from '@/server/di'
-import type { UserController } from '@/server/controllers'
+import type { UserController } from '@/server/controllers/user'
 
 const controller = fromDI<UserController>('UserController')
 
