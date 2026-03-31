@@ -434,7 +434,7 @@ function generateInfrastructure(upperCase, lowerCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase} } from '@${config?.paths?.infrastructure}/${entityName}'`
+        `import { ${upperCase}, Mock${upperCase} } from '@${config?.paths?.infrastructure}/${entityName}'`
     )
 
     insertAfterLineInFile(
