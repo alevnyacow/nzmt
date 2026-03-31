@@ -403,6 +403,48 @@ function initPrisma() {
     )
 }
 
+function generateInfrastructure(upperCase, lowerCase) {
+    const config = loadConfig()
+    const folder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, entityName)
+    fs.mkdirSync(folder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.ts`), [
+        `export class ${upperCase} {`,
+        `\t`,
+        `}`
+    ])
+
+    fs.writeFileSync(path.resolve(folder, `${entityName}.mock.ts`), [
+        `import { ${upperCase} } from './${entityName}'`,
+        '',
+        `export class Mock${upperCase} implements ${upperCase} {`,
+        `\t`,
+        `}`
+    ])
+
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        `export * from './${entityName}'`,
+        `export * from './${entityName}.mock'`
+    ])
+
+    // Update DI
+
+    const diEntriesPath = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.di}`, 'entries.di.ts')
+
+    insertBeforeLineInFile(
+        diEntriesPath,
+        'type DIEntries =',
+        `import { ${upperCase} } from '@${config?.paths?.infrastructure}/${entityName}'`
+    )
+
+    insertAfterLineInFile(
+        diEntriesPath,
+        '// Infrastructure',
+        `\t${upperCase}: { test: Mock${upperCase}, dev: ${upperCase}, prod: ${upperCase} },`,
+    )
+}
+
+
 function initGuards() {
     const config = loadConfig()
     const endpointGuardsFolder = path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.infrastructure}`, 'guards')
@@ -435,7 +477,6 @@ function initGuards() {
         '// Infrastructure',
         `\tGuards,`,
     )
-
 }
 
 function initLogger() {
@@ -482,7 +523,7 @@ function initLogger() {
     )
 }
 
-if (command.toLowerCase() === 'init' || command === 'i') {
+if (command.toLowerCase() === 'init') {
     createDefaultConfig()
     initDI()
     initClientUtils()
@@ -1283,8 +1324,8 @@ function generateQueries(lowerCase, upperCase, entity) {
 
     const indexPath = path.resolve(projectRoot, `${config.coreFolder}${config.paths.queries}`, `${requiredEntity}`)
     fs.writeFileSync(path.resolve(indexPath, 'index.ts'), `export * as ${upperCase}Queries from './endpoints'`)
-
 }
+
 
 
 if (command === 'api-routes') {
@@ -1314,6 +1355,13 @@ if (command.toLowerCase() === 'controller' || command === 'c') {
     var [lowerCase, upperCase] = camelizeVariants(entityName)
     generateController(upperCase, lowerCase)
     process.exit(0)
+}
+
+if (command.toLowerCase() === 'infrastructure' || command === 'i') {
+    var [lowerCase, upperCase] = camelizeVariants(entityName)
+    generateInfrastructure(upperCase, lowerCase)
+    process.exit(0)
+
 }
 
 if (command.toLowerCase() === 'stored-entity' || command === 'se') {
