@@ -409,6 +409,15 @@ function generateInfrastructure(upperCase, lowerCase) {
     fs.mkdirSync(folder, { recursive: true })
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.ts`), [
+        `import { Module } from '@alevnyacow/nzmt'`,
+        '',
+        `export const ${lowerCase}InfrastructureMetadata = {`,
+        `\tname: '${upperCase}Infrastructure',`,
+        `\tschemas: {}`,
+        `} satisfies Module.Metadata`,
+        ``,
+        `const methods = Module.methods(${lowerCase}InfrastructureMetadata)`,
+        '',
         `export class ${upperCase} {`,
         `\t`,
         `}`
