@@ -212,7 +212,7 @@ foo: {
 foo = this.methods('foo', async ({ str }) => {
   // 'foo' string is strongly-typed, don't worry
   // all input and output types are also infered
-  return { num: Number(requestString) }
+  return { num: Number(str) }
 })
 // ..service class implementation
 ```
