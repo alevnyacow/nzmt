@@ -142,6 +142,7 @@ export default async function Page() {
 | `npx nzmt e <name>`  | **e**ntity ||
 | `npx nzmt vo <name>` | **v**alue **o**bject ||
 | `npx nzmt cs <name>`  | **c**ustom **s**tore (all schemas are `z.object({})`) ||
+| `npx nzmt p <name>`  | **p**rovider | `pt:Console` will generate Console provider. Default value is `pt:API` |
 | `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
 | `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
 
@@ -160,6 +161,8 @@ They:
 - validate data at runtime
 - can be reused across layers (no separate DTOs needed)
 - automatically infer types (no manual TypeScript work)
+
+Service method description example:
 
 ```ts
 orderDetails: {

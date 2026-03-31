@@ -832,7 +832,7 @@ function generateProvider(lowerCase, upperCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '@${config?.paths?.providers}/${entityName}}'`
+        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '@${config?.paths?.providers}/${entityName}'`
     )
 
     insertAfterLineInFile(
