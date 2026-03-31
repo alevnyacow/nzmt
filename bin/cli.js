@@ -827,7 +827,7 @@ function generateProvider(lowerCase, upperCase) {
     
     fs.mkdirSync(folder, { recursive: true })
     
-    // Base
+    // Provider
     fs.writeFileSync(path.resolve(folder, `${entityName}.provider.ts`), [
         `import { Module } from '@alevnyacow/nzmt',`,
         '',
@@ -836,9 +836,7 @@ function generateProvider(lowerCase, upperCase) {
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
         ``,
-        `type Methods = Module.Methods<typeof ${lowerCase}ProviderMetadata>;`,
-        ``,
-        `export abstract class ${upperCase}Provider {`,
+        `export class ${upperCase}Provider {`,
         `\tprotected methods = Module.methods(${lowerCase}ProviderMetadata)`,
         `}`
     ].join('\n'))
@@ -847,16 +845,7 @@ function generateProvider(lowerCase, upperCase) {
     fs.writeFileSync(path.resolve(folder, `${entityName}.provider.mock.ts`), [
         `import { ${upperCase}Provider } from './${entityName}.provider'`,
         '',
-        `export class ${upperCase}MockProvider extends ${upperCase}Provider {`,
-        `\t`,
-        `}`
-    ].join('\n'))
-
-    // Provider
-    fs.writeFileSync(path.resolve(folder, `${entityName}.provider.${providerType.toLowerCase()}.ts`), [
-        `import { ${upperCase}Provider } from './${entityName}.provider'`,
-        '',
-        `export class ${upperCase}${providerType}Provider extends ${upperCase}Provider {`,
+        `export class ${upperCase}MockProvider implements ${upperCase}Provider {`,
         `\t`,
         `}`
     ].join('\n'))
@@ -864,7 +853,7 @@ function generateProvider(lowerCase, upperCase) {
     // Barrel
     fs.writeFileSync(path.resolve(folder, `index.ts`), [
         `export * from './${entityName}.provider'`,
-        `export * from './${entityName}.provider.${providerType.toLowerCase()}'`
+        `export * from './${entityName}.provider.mock'`
     ].join('\n'))
 
     // Update DI
@@ -873,13 +862,13 @@ function generateProvider(lowerCase, upperCase) {
     insertBeforeLineInFile(
         diEntriesPath,
         'type DIEntries =',
-        `import { ${upperCase}MockProvider, ${upperCase}${providerType}Provider } from '@${config?.paths?.providers}/${entityName}'`
+        `import { ${upperCase}MockProvider, ${upperCase}Provider } from '@${config?.paths?.providers}/${entityName}'`
     )
 
     insertAfterLineInFile(
         diEntriesPath,
         '// Providers',
-        `\t${upperCase}Provider: { test: ${upperCase}MockProvider, prod: ${upperCase}${providerType}Provider, dev: ${upperCase}${providerType}Provider },`,
+        `\t${upperCase}Provider: { test: ${upperCase}MockProvider, prod: ${upperCase}Provider, dev: ${upperCase}Provider },`,
     )
 }
 
