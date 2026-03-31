@@ -126,6 +126,12 @@ export default async function Page() {
 
 # Scaffolder commands glossary
 
+## Initialization
+
+| Command | Scaffolding result |Options|
+|---------|-------------|-------|
+| `npx nzmt init`  | **init**ialization |pass `prismaClientPath:` to work with Prisma. E.g. `npx nzmt init prismaClientPath:@/generated/prisma/client`|
+
 ## Complex scaffolding
 
 | Command | Scaffolding result |
@@ -135,18 +141,23 @@ export default async function Page() {
 | `npx nzmt se <name>` | **s**tored **e**ntity: entity + store (contracts linked). |
 | `npx nzmt rq` | API **r**outes and React **q**ueries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
 
-## Single module scaffolding
+## Primary server modules scaffolding
 
 | Command | Scaffolding result |Options|
 |---------|-------------|-------|
 | `npx nzmt e <name>`  | **e**ntity ||
 | `npx nzmt vo <name>` | **v**alue **o**bject ||
 | `npx nzmt cs <name>`  | **c**ustom **s**tore (all schemas are `z.object({})`) ||
-| `npx nzmt p <name>`  | **p**rovider | |
 | `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
 | `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
 
----
+## Auxiliary server modules scaffolding
+
+| Command | Scaffolding result |
+|---------|-------------|
+| `npx nzmt p <name>`  | **p**rovider |
+| `npx nzmt i <name>`  | **i**nfrastructure module |
+
 
 # How to implement your own methods
 
@@ -163,13 +174,22 @@ They:
 Service method description example:
 
 ```ts
+// ...some service metadata
 orderDetails: {
-  payload: Order.schema.pick({ name: true, createdDate: true }),
+  payload: Order.schema.pick({ 
+    name: true, 
+    createdDate: true 
+  }),
   response: z.object({
     user: User.schema,
-    products: z.array(Product.schema.omit({ price: true }))
+    products: z.array(
+      Product.schema.omit({ 
+        price: true 
+      })
+    )
   })
 }
+// ...some service metadata
 ```
 
 ## Services
@@ -177,20 +197,24 @@ orderDetails: {
 1. **Define method in metadata** (`*.service.metadata.ts`):
 
 ```ts
+// ...service metadata
 foo: {
   request: z.object({ requestString: z.string() }),
   response: z.object({ responseNumber: z.number() })
 }
+// ...service metadata
 ```
 
 2. **Implement it in service** (`*.service.ts`):
 
 ```ts
-// 'foo' string is strongly-typed, don't worry
+// ...service class implementation
 foo = this.methods('foo', async ({ requestString }) => {
+  // 'foo' string is strongly-typed, don't worry
   // all input and output types are also infered
   return Number(requestString)
 })
+// ..service class implementation
 ```
 
 ## Controllers
@@ -200,43 +224,30 @@ Same idea, but metadata uses optional `query`, optional `body`, and `response`.
 1. **Metadata** (`*.controller.metadata.ts`):
 
 ```ts
+// ...controller metadata
 POST: {
   query: z.object({ id: z.string() }),
   body: z.object({ delta: z.number() }),
   response: z.object({ success: z.boolean() })
 }
+// ...controller metadata
 ```
 
 2. **Implementation** (`*.controller.ts`):
 
+`query` and `body` are merged into one object in implementation
+
 ```ts
+// ...controller class implementation
 POST = this.endpoints('POST', async ({ id, delta }) => {
   return { success: true }
 })
+// ..controller class implementation
 ```
 
-`query` + `body` are merged into one object in implementation.
+### React-queries and API routes
 
-## Usage in Next.js
-
-Controllers can be used directly as API routes:
-
-```ts
-// api/user-controller/route.ts
-const controller = fromDI<UserController>('UserController')
-
-export const GET = controller.GET
-```
-
-And servers can be used directlt as Server Actions:
-
-```tsx
-export default async function() {
-  const service = fromDI<UserService>('UserService')
-  const users = await service.getList({ filter: {} })
-  // ...
-}
-```
+Once you done implementing controller methods, just run `nmx nzmt rq`. This command will generate up-to-date API routes and React Query hooks for all your controllers. You can call it also, for example, in a pre-commit hook so that your backend and frontend integration is always kept in sync.
 
 # FAQ
 
