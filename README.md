@@ -145,34 +145,35 @@ export default async function Page() {
 | `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
 | `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
 
+Here’s a shorter, simpler version in English:
+
+---
+
 # How to implement your own methods
 
-## Module contracts as Zod schemas
+## Zod schemas (module contracts)
 
-Server module methods are described using Zod schemas. NZMT uses fancy word `metadata` for such contracts, so they can be found in separated files like `user.controller.metadata.ts` or `product.service.metadata.ts`. Besides runtime safety, they’re easy to reuse across layers—no need for separate DTOs.
+Server method contracts are defined with Zod schemas in files like `user.controller.metadata.ts` or `product.service.metadata.ts`.
+
+They:
+
+- validate data at runtime
+- can be reused across layers (no separate DTOs needed)
+- automatically infer types (no manual TypeScript work)
 
 ```ts
-// ...some service metadata schemas
-orderDetais: {
-  payload: Order.schema.pick({ 
-    name: true, 
-    createdDate: true 
-  }),
-  response: z.object({ 
-    user: User.schema, 
+orderDetails: {
+  payload: Order.schema.pick({ name: true, createdDate: true }),
+  response: z.object({
+    user: User.schema,
     products: z.array(Product.schema.omit({ price: true }))
   })
 }
-// ...some service metadata schemas
 ```
-
-**All types and keys are infered, no need to worry about TypeScript.**
 
 ## Services
 
-To add a method:
-
-1. **Describe it in metadata schemas** using Zod (`service-name.service.metadata.ts`):
+1. **Define method in metadata** (`*.service.metadata.ts`):
 
 ```ts
 foo: {
@@ -181,7 +182,7 @@ foo: {
 }
 ```
 
-2. **Implement it in the service class** (`service-name.service.ts`):
+2. **Implement it in service** (`*.service.ts`):
 
 ```ts
 // 'foo' string is strongly-typed, don't worry
@@ -193,9 +194,9 @@ foo = this.methods('foo', async ({ requestString }) => {
 
 ## Controllers
 
-Same idea and types inference, but metadata consists of `query`, `body`, and `response`.
+Same idea, but metadata uses optional `query`, optional `body`, and `response`.
 
-1. **Metadata** (`controller-name.controller.metadata.ts`): 
+1. **Metadata** (`*.controller.metadata.ts`):
 
 ```ts
 POST: {
@@ -205,30 +206,36 @@ POST: {
 }
 ```
 
-2. **Implementation** (`controller-name.controller.ts`):
+2. **Implementation** (`*.controller.ts`):
 
 ```ts
-// `query` and `body` are merged into a single payload
 POST = this.endpoints('POST', async ({ id, delta }) => {
   return { success: true }
 })
 ```
 
-This method can be used directly as a Next.js API route handler. If you examine generated API route files you will see something like this:
+`query` + `body` are merged into one object in implementation.
+
+## Usage in Next.js
+
+Controllers can be used directly as API routes:
 
 ```ts
 // api/user-controller/route.ts
-import { fromDI } from '@/server/di'
-import type { UserController } from '@/server/controllers/user'
-
 const controller = fromDI<UserController>('UserController')
 
 export const GET = controller.GET
-export const PUT = controller.PUT
-export const PATCH = controller.PATCH
-export const DELETE = controller.DELETE
 ```
 
+And servers can be used directlt as Server Actions:
+
+```tsx
+export default async function() {
+  const service = fromDI<UserService>('UserService')
+  const users = await service.getList({ filter: {} })
+  // ...
+}
+```
 
 # FAQ
 
