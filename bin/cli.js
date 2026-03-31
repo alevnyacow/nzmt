@@ -863,7 +863,7 @@ function generateProvider(lowerCase, upperCase) {
         `import { PublicFields } from '@/${config.paths.infrastructure}/ts-helpers'`,
         `import { ${upperCase}Provider } from './${entityName}.provider'`,
         '',
-        `export class ${upperCase}MockProvider implements ${upperCase}Provider {`,
+        `export class ${upperCase}MockProvider implements PublicFields<${upperCase}Provider> {`,
         `\t`,
         `}`
     ].join('\n'))
