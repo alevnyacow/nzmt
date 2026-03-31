@@ -788,10 +788,10 @@ function generateProvider(lowerCase, upperCase) {
     
     // Base
     fs.writeFileSync(path.resolve(folder, `${entityName}.provider.ts`), [
-        `import { Module } from '@alevnyacow/nzmt'`,
+        `import { Module } from '@alevnyacow/nzmt',`,
         '',
         `export const ${lowerCase}ProviderMetadata = {`,
-        `\tname: '${upperCase}Provider'`,
+        `\tname: '${upperCase}Provider',`,
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
         ``,
@@ -816,7 +816,7 @@ function generateProvider(lowerCase, upperCase) {
         `import { ${upperCase}Provider } from './${entityName}.provider'`,
         '',
         `export class ${upperCase}${providerType}Provider extends ${upperCase}Provider {`,
-        `\tprotected method = zodModuleMethodFactory(mailProviderMetadata);`,
+        `\t`,
         `}`
     ].join('\n'))
 
