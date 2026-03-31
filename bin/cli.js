@@ -836,7 +836,7 @@ function generateProvider(lowerCase, upperCase) {
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
         ``,
-        'const methods Module.methods(${lowerCase}ProviderMetadata)',
+        `const methods = Module.methods(${lowerCase}ProviderMetadata)`,
         '',
         `export class ${upperCase}Provider {`,
         `\t`,
