@@ -152,6 +152,15 @@ function initSharedErrors() {
     fs.writeFileSync(path.resolve(folder, 'index.ts'), "export * from './shared-error-codes'")
 }
 
+function initTSHelpers() {
+    const config = loadConfig()
+    const folder = path.resolve(process.cwd(), `${config.coreFolder}${config.paths.infrastructure}`)
+
+    fs.writeFileSync(path.resolve(folder, 'ts-helpers.ts'), [
+        "export type PublicFields<A> = { [k in keyof A]: A[k] }",
+    ].join('\n'))
+}
+
 function initVO() {
     const config = loadConfig()
     const voFolder = path.resolve(process.cwd(), `${config.coreFolder}${config.paths.valueObjects}`)
@@ -415,18 +424,17 @@ function generateInfrastructure(upperCase, lowerCase) {
         `\tname: '${upperCase}Infrastructure',`,
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
-        ``,
-        `const methods = Module.methods(${lowerCase}InfrastructureMetadata)`,
         '',
         `export class ${upperCase} {`,
-        `\t`,
+        `\tprivate methods = Module.methods(${lowerCase}InfrastructureMetadata)`,
         `}`
     ].join('\n'))
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.mock.ts`), [
+        `import { PublicFields } from '@/${config.paths.infrastructure}/ts-helpers'`,
         `import { ${upperCase} } from './${entityName}'`,
         '',
-        `export class Mock${upperCase} implements ${upperCase} {`,
+        `export class Mock${upperCase} implements PublicFields<${upperCase}> {`,
         `\t`,
         `}`
     ].join('\n'))
@@ -541,6 +549,7 @@ if (command.toLowerCase() === 'init') {
     initPrisma()
     initLogger()
     initGuards()
+    initTSHelpers()
 
     process.exit(0)
 }
@@ -832,7 +841,6 @@ if (command.toLowerCase() === 'value-object' || command === 'vo') {
 
 function generateProvider(lowerCase, upperCase) {
     const folder = config?.paths?.providers ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.providers}`, entityName) : path.resolve(process.cwd(), entityName);
-    const providerType = options.find(x => x.startsWith('pt:'))?.split(':')?.at(1) ?? 'API'
     
     fs.mkdirSync(folder, { recursive: true })
     
@@ -844,16 +852,15 @@ function generateProvider(lowerCase, upperCase) {
         `\tname: '${upperCase}Provider',`,
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
-        ``,
-        `const methods = Module.methods(${lowerCase}ProviderMetadata)`,
         '',
         `export class ${upperCase}Provider {`,
-        `\t`,
+        `\tprivate methods = Module.methods(${lowerCase}ProviderMetadata)`,
         `}`
     ].join('\n'))
 
     // Mock
     fs.writeFileSync(path.resolve(folder, `${entityName}.provider.mock.ts`), [
+        `import { PublicFields } from '@/${config.paths.infrastructure}/ts-helpers'`,
         `import { ${upperCase}Provider } from './${entityName}.provider'`,
         '',
         `export class ${upperCase}MockProvider implements ${upperCase}Provider {`,
