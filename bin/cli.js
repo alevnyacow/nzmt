@@ -412,7 +412,7 @@ function generateInfrastructure(upperCase, lowerCase) {
         `export class ${upperCase} {`,
         `\t`,
         `}`
-    ])
+    ].join('\n'))
 
     fs.writeFileSync(path.resolve(folder, `${entityName}.mock.ts`), [
         `import { ${upperCase} } from './${entityName}'`,
@@ -420,12 +420,12 @@ function generateInfrastructure(upperCase, lowerCase) {
         `export class Mock${upperCase} implements ${upperCase} {`,
         `\t`,
         `}`
-    ])
+    ].join('\n'))
 
     fs.writeFileSync(path.resolve(folder, `index.ts`), [
         `export * from './${entityName}'`,
         `export * from './${entityName}.mock'`
-    ])
+    ].join('\n'))
 
     // Update DI
 
