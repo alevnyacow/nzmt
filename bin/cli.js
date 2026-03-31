@@ -829,15 +829,17 @@ function generateProvider(lowerCase, upperCase) {
     
     // Provider
     fs.writeFileSync(path.resolve(folder, `${entityName}.provider.ts`), [
-        `import { Module } from '@alevnyacow/nzmt',`,
+        `import { Module } from '@alevnyacow/nzmt'`,
         '',
         `export const ${lowerCase}ProviderMetadata = {`,
         `\tname: '${upperCase}Provider',`,
         `\tschemas: {}`,
         `} satisfies Module.Metadata`,
         ``,
+        'const methods Module.methods(${lowerCase}ProviderMetadata)',
+        '',
         `export class ${upperCase}Provider {`,
-        `\tprotected methods = Module.methods(${lowerCase}ProviderMetadata)`,
+        `\t`,
         `}`
     ].join('\n'))
 
