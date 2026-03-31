@@ -199,8 +199,8 @@ orderDetails: {
 ```ts
 // ...service metadata
 foo: {
-  request: z.object({ requestString: z.string() }),
-  response: z.object({ responseNumber: z.number() })
+  request: z.object({ str: z.string() }),
+  response: z.object({ num: z.number() })
 }
 // ...service metadata
 ```
@@ -209,10 +209,10 @@ foo: {
 
 ```ts
 // ...service class implementation
-foo = this.methods('foo', async ({ requestString }) => {
+foo = this.methods('foo', async ({ str }) => {
   // 'foo' string is strongly-typed, don't worry
   // all input and output types are also infered
-  return Number(requestString)
+  return { num: Number(requestString) }
 })
 // ..service class implementation
 ```
