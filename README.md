@@ -73,7 +73,7 @@ Schema: Client → React Query → API → Controller → Service → Store → 
 ```tsx
 'use client'
 
-import { UserQueries } from "@/ui/shared/queries/user";
+import { UserQueries } from '@/ui/shared/queries/user';
 
 export default function Page() {
   const { mutate: addUser } = UserQueries.usePOST()
