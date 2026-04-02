@@ -13,7 +13,7 @@ Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolki
 
 Get a DDD-inspired architecture with a contract-first approach out of the box. NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. 
 
-Batteries included!
+Batteries included! ✨
 
 # TL;DR
 
