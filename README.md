@@ -248,7 +248,7 @@ POST: {
 
 2. **Implementation** (`*.controller.ts`):
 
-`query` and `body` are merged into one object in implementation
+`query` and `body` are merged into one object in implementation:
 
 ```ts
 // ...controller class implementation
