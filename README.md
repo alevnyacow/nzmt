@@ -23,7 +23,7 @@ Initialize NZMT once, run the scaffolder, and tweak a few files to get a product
 
 (may not work on Safari)
 
-https://stackblitz.com/edit/nzmt-playground?file=app%2Fpage.tsx
+https://stackblitz.com/edit/nzmt-playground
 
 # Quick start with Prisma
 
