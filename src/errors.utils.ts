@@ -62,38 +62,38 @@ export const isModuleError = (arg: any): arg is ModuleErrorModel => {
     return !argKeys.includes('statusCode');
 };
 
+const spawnBaseError = ({
+    error,
+    code,
+    details
+}: ErrorBaseCreatingPayload): ErrorBaseModel => {
+    let err: Error =
+        error instanceof Error ? error : new Error('unknown error');
+
+    if (typeof error === 'string' || typeof error === 'number') {
+        err = new Error(error?.toString());
+    }
+
+    if (typeof error === 'object' && error !== null) {
+        if (error instanceof Error) {
+            err = error;
+        } else {
+            const jsonRepresentation = JSON.stringify(error);
+            err = new Error(jsonRepresentation);
+        }
+    }
+
+    return {
+        message: err.message,
+        name: err.name,
+        timestamp: Date.now(),
+        code: code || err.name,
+        details: details || null
+    };
+};
+
 // biome-ignore lint/complexity/noStaticOnlyClass: will be refactored
 export class ErrorFactory {
-    private static base = ({
-        error,
-        code,
-        details
-    }: ErrorBaseCreatingPayload): ErrorBaseModel => {
-        let err: Error =
-            error instanceof Error ? error : new Error('unknown error');
-
-        if (typeof error === 'string' || typeof error === 'number') {
-            err = new Error(error?.toString());
-        }
-
-        if (typeof error === 'object' && error !== null) {
-            if (error instanceof Error) {
-                err = error;
-            } else {
-                const jsonRepresentation = JSON.stringify(error);
-                err = new Error(jsonRepresentation);
-            }
-        }
-
-        return {
-            message: err.message,
-            name: err.name,
-            timestamp: Date.now(),
-            code: code || err.name,
-            details: details || null
-        };
-    };
-
     static forModule = (serviceName: string) => {
         return {
             inMethod: (methodName: string) => {
@@ -102,7 +102,7 @@ export class ErrorFactory {
                         payload: ErrorBaseCreatingPayload,
                         cause?: unknown
                     ): ModuleErrorModel => {
-                        const errorBase = ErrorFactory.base(payload);
+                        const errorBase = spawnBaseError(payload);
                         return {
                             ...errorBase,
                             cause: cause
@@ -127,7 +127,7 @@ export class ErrorFactory {
                         },
                         cause?: unknown
                     ): ControllerErrorModel => {
-                        const errorBase = ErrorFactory.base(payload);
+                        const errorBase = spawnBaseError(payload);
                         const formattedCause = cause
                             ? ErrorFactory.fromUnknownError(cause)
                             : null;
@@ -167,6 +167,6 @@ export class ErrorFactory {
             return error as ErrorBaseModel;
         }
 
-        return ErrorFactory.base({ error });
+        return spawnBaseError({ error });
     };
 }
