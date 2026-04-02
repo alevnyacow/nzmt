@@ -232,7 +232,7 @@ const { num } = await someMethod.foo({ str: '25' })
 
 ## Controllers
 
-Same idea, but metadata uses optional `query`, optional `body`, and `response`.
+Same idea, but metadata uses optional `query` and optional `body` instead of abstract `request`.
 
 1. **Metadata** (`*.controller.metadata.ts`):
 
