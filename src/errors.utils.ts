@@ -115,7 +115,6 @@ const spawnFromUnknownError = (
     return spawnBaseError({ error });
 };
 
-// biome-ignore lint/complexity/noStaticOnlyClass: will be refactored
 export class ErrorFactory {
     static forModule = (serviceName: string) => {
         return {
