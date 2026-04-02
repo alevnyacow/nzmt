@@ -217,6 +217,14 @@ foo = this.methods('foo', async ({ str }) => {
 // ..service class implementation
 ```
 
+### Usage
+
+Service methods can be used like a usual method of signature `(data: Request) => Promise<Response>`. E.g.
+
+```ts
+const { num } = await someMethod.foo({ str: '25' })
+```
+
 ## Controllers
 
 Same idea, but metadata uses optional `query`, optional `body`, and `response`.
