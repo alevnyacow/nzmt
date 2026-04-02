@@ -8,8 +8,8 @@ import {
 } from './errors.utils';
 
 export enum DefaultErrorCodes {
-    REQUEST_PARSING = 'ZOD-CONTROLLER___REQUEST-PARSING',
-    RESPONSE_PARSING = 'ZOD-CONTROLLER___RESPONSE-PARSING'
+    REQUEST_PARSING = 'NZMT-CONTROLLER___REQUEST-PARSING',
+    RESPONSE_PARSING = 'NZMT-CONTROLLER___RESPONSE-PARSING'
 }
 
 type SuccessResponse<ResponseZodSchema> = ResponseZodSchema extends undefined
