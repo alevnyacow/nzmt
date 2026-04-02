@@ -138,34 +138,32 @@ export const spawnModuleError = (moduleName: string) => {
     };
 }
 
-export class ErrorFactory {
-    static forController = (controllerName: string) => {
-        return {
-            inMethod: (methodName: string) => {
-                return {
-                    newError: (
-                        payload: ErrorBaseCreatingPayload & {
-                            statusCode: number;
-                        },
-                        cause?: unknown
-                    ): ControllerErrorModel => {
-                        const errorBase = spawnBaseError(payload);
-                        const formattedCause = cause
-                            ? spawnFromUnknownError(cause)
-                            : null;
-                        if (!payload.code && formattedCause?.code) {
-                            errorBase.code = formattedCause.code;
-                        }
-                        return {
-                            ...errorBase,
-                            cause: formattedCause,
-                            module: controllerName,
-                            method: methodName,
-                            statusCode: payload.statusCode
-                        };
+export const spawnControllerError = (controllerName: string) => {
+    return {
+        inMethod: (methodName: string) => {
+            return {
+                newError: (
+                    payload: ErrorBaseCreatingPayload & {
+                        statusCode: number;
+                    },
+                    cause?: unknown
+                ): ControllerErrorModel => {
+                    const errorBase = spawnBaseError(payload);
+                    const formattedCause = cause
+                        ? spawnFromUnknownError(cause)
+                        : null;
+                    if (!payload.code && formattedCause?.code) {
+                        errorBase.code = formattedCause.code;
                     }
-                };
-            }
-        };
+                    return {
+                        ...errorBase,
+                        cause: formattedCause,
+                        module: controllerName,
+                        method: methodName,
+                        statusCode: payload.statusCode
+                    };
+                }
+            };
+        }
     };
 }

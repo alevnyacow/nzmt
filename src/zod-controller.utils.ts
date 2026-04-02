@@ -3,8 +3,8 @@ import z, { type ZodType, type ZodObject, type ZodUnion } from 'zod';
 import {
     type ControllerErrorModel,
     type ErrorBaseCreatingPayload,
-    ErrorFactory,
-    isControllerError
+    isControllerError,
+    spawnControllerError
 } from './errors.utils';
 
 export enum DefaultErrorCodes {
@@ -112,7 +112,7 @@ export const endpoints = <T extends Schemas>(
         return async (request: NextRequest) => {
             let requestPayload = {};
 
-            const errorFactory = ErrorFactory.forController(
+            const errorFactory = spawnControllerError(
                 metadata.name
             ).inMethod(method as string);
 

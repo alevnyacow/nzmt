@@ -2,7 +2,6 @@ import type z from 'zod';
 import type { ZodType } from 'zod';
 import {
     type ErrorBaseCreatingPayload,
-    ErrorFactory,
     isModuleError,
     type ModuleErrorModel,
     spawnModuleError
@@ -100,7 +99,7 @@ export const methods =
                 const serviceErrorGenerator = spawnModuleError(
                     name
                 ).inMethod(methodName as string);
-                
+
                 const serviceError = serviceErrorGenerator.newError(
                     {
                         error: 'Caught unhandled module error (see `cause` field for details)'
