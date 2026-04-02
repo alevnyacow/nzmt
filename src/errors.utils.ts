@@ -92,6 +92,29 @@ const spawnBaseError = ({
     };
 };
 
+const spawnFromUnknownError = (
+    error: unknown
+): ErrorBaseModel | ModuleErrorModel => {
+    const isErrorBase = (arg: any): arg is ErrorBaseModel => {
+        if (typeof arg !== 'object' || !arg) {
+            return false;
+        }
+        const argKeys = Object.keys(arg);
+        const requiredKeys = ['name', 'message', 'code', 'timestamp'];
+        return requiredKeys.every((x) => argKeys.includes(x));
+    };
+
+    if (isModuleError(error)) {
+        return error as ModuleErrorModel;
+    }
+
+    if (isErrorBase(error)) {
+        return error as ErrorBaseModel;
+    }
+
+    return spawnBaseError({ error });
+};
+
 // biome-ignore lint/complexity/noStaticOnlyClass: will be refactored
 export class ErrorFactory {
     static forModule = (serviceName: string) => {
@@ -106,7 +129,7 @@ export class ErrorFactory {
                         return {
                             ...errorBase,
                             cause: cause
-                                ? ErrorFactory.fromUnknownError(cause)
+                                ? spawnFromUnknownError(cause)
                                 : null,
                             module: serviceName,
                             method: methodName
@@ -129,7 +152,7 @@ export class ErrorFactory {
                     ): ControllerErrorModel => {
                         const errorBase = spawnBaseError(payload);
                         const formattedCause = cause
-                            ? ErrorFactory.fromUnknownError(cause)
+                            ? spawnFromUnknownError(cause)
                             : null;
                         if (!payload.code && formattedCause?.code) {
                             errorBase.code = formattedCause.code;
@@ -145,28 +168,5 @@ export class ErrorFactory {
                 };
             }
         };
-    };
-
-    static fromUnknownError = (
-        error: unknown
-    ): ErrorBaseModel | ModuleErrorModel => {
-        const isErrorBase = (arg: any): arg is ErrorBaseModel => {
-            if (typeof arg !== 'object' || !arg) {
-                return false;
-            }
-            const argKeys = Object.keys(arg);
-            const requiredKeys = ['name', 'message', 'code', 'timestamp'];
-            return requiredKeys.every((x) => argKeys.includes(x));
-        };
-
-        if (isModuleError(error)) {
-            return error as ModuleErrorModel;
-        }
-
-        if (isErrorBase(error)) {
-            return error as ErrorBaseModel;
-        }
-
-        return spawnBaseError({ error });
     };
 }
