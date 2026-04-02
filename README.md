@@ -19,7 +19,7 @@ Batteries included!
 
 Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready backend usable via Server Actions with ready-to-use React Query hooks.
 
-# Playground
+# Playground on Stackblitz
 
 (may not work on Safari)
 
