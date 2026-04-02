@@ -1,4 +1,14 @@
-import { type NextRequest, NextResponse } from 'next/server';
+function jsonResponse<T>(data: T, init?: ResponseInit) {
+  return new Response(JSON.stringify(data), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers || {}),
+    },
+  })
+}
+
+import { type NextRequest, type NextResponse } from 'next/server';
 import z, { type ZodType, type ZodObject, type ZodUnion } from 'zod';
 import {
     type ControllerErrorModel,
@@ -264,7 +274,7 @@ export const endpoints = <T extends Schemas>(
                         );
                     }
 
-                    return NextResponse.json<SuccessResponse<unknown>>(
+                    return jsonResponse<SuccessResponse<unknown>>(
                         resultParsed.data,
                         { status: 200 }
                     );
@@ -290,7 +300,7 @@ export const endpoints = <T extends Schemas>(
                     });
                 }
 
-                return NextResponse.json<SuccessResponse<unknown>>(
+                return jsonResponse<SuccessResponse<unknown>>(
                     {},
                     { status: 200 }
                 );
@@ -361,7 +371,7 @@ export const endpoints = <T extends Schemas>(
                     });
                 }
 
-                return NextResponse.json<ErrorResponse>(
+                return jsonResponse<ErrorResponse>(
                     {
                         message: controllerError.message,
                         details: controllerError.statusCode
