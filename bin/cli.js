@@ -1096,7 +1096,7 @@ function generateController(upperCase, lowerCase, crudService) {
             `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.update.response`,
             `\t\t},`,
             `\t\tDELETE: {`,
-            `\t\t\tquery: ${crudServiceLowercase}Metadata.schemas.delete.payload,`,
+            `\t\t\tquery: ${crudServiceLowercase}Metadata.schemas.delete.payload.shape.filter,`,
             `\t\t\tresponse: ${crudServiceLowercase}Metadata.schemas.delete.response`,
             `\t\t},`,
             `\t}`,
@@ -1144,7 +1144,7 @@ function generateController(upperCase, lowerCase, crudService) {
             ``,
             `\tPOST = this.endpoints('POST', this.${crudServiceLowercase}.create)`,
             `\tPATCH = this.endpoints('PATCH', this.${crudServiceLowercase}.update)`,
-            `\tDELETE = this.endpoints('DELETE', this.${crudServiceLowercase}.delete)`,
+            `\tDELETE = this.endpoints('DELETE', (filter) => this.${crudServiceLowercase}.delete({ filter }))`,
         ].join('\n') : undefined,
         `}`
     ].filter(x => typeof x === 'string').join('\n'))
