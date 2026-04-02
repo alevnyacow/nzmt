@@ -25,27 +25,26 @@ export type ControllerErrorModel = ErrorBaseModel & {
     statusCode: number;
 };
 
+export const isControllerError = (error: unknown): error is ControllerErrorModel => {
+    if (!error || typeof error !== 'object') {
+        return false;
+    }
+    const argKeys = Object.keys(error);
+    const requiredKeys = [
+        'name',
+        'message',
+        'code',
+        'module',
+        'method',
+        'timestamp',
+        'statusCode'
+    ];
+
+    return requiredKeys.every((x) => argKeys.includes(x));
+}
+
 // biome-ignore lint/complexity/noStaticOnlyClass: will be refactored
 export class ErrorFactory {
-    static isControllerError = (
-        error: unknown
-    ): error is ControllerErrorModel => {
-        if (!error || typeof error !== 'object') {
-            return false;
-        }
-        const argKeys = Object.keys(error);
-        const requiredKeys = [
-            'name',
-            'message',
-            'code',
-            'module',
-            'method',
-            'timestamp',
-            'statusCode'
-        ];
-
-        return requiredKeys.every((x) => argKeys.includes(x));
-    };
 
     static isModuleError = (arg: any): arg is ModuleErrorModel => {
         if (typeof arg !== 'object' || !arg) {

@@ -3,7 +3,8 @@ import z, { type ZodType, type ZodObject, type ZodUnion } from 'zod';
 import {
     type ControllerErrorModel,
     type ErrorBaseCreatingPayload,
-    ErrorFactory
+    ErrorFactory,
+    isControllerError
 } from './errors.utils';
 
 export enum DefaultErrorCodes {
@@ -297,7 +298,7 @@ export const endpoints = <T extends Schemas>(
                 let controllerError: ControllerErrorModel =
                     e as ControllerErrorModel;
 
-                if (!ErrorFactory.isControllerError(e)) {
+                if (isControllerError(e)) {
                     controllerError = errorFactory.newError(
                         {
                             error: 'Internal error',
