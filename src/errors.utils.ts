@@ -43,28 +43,27 @@ export const isControllerError = (error: unknown): error is ControllerErrorModel
     return requiredKeys.every((x) => argKeys.includes(x));
 }
 
+export const isModuleError = (arg: any): arg is ModuleErrorModel => {
+    if (typeof arg !== 'object' || !arg) {
+        return false;
+    }
+    const argKeys = Object.keys(arg);
+    const requiredKeys = [
+        'name',
+        'message',
+        'code',
+        'module',
+        'method',
+        'timestamp'
+    ];
+    if (!requiredKeys.every((x) => argKeys.includes(x))) {
+        return false;
+    }
+    return !argKeys.includes('statusCode');
+};
+
 // biome-ignore lint/complexity/noStaticOnlyClass: will be refactored
 export class ErrorFactory {
-
-    static isModuleError = (arg: any): arg is ModuleErrorModel => {
-        if (typeof arg !== 'object' || !arg) {
-            return false;
-        }
-        const argKeys = Object.keys(arg);
-        const requiredKeys = [
-            'name',
-            'message',
-            'code',
-            'module',
-            'method',
-            'timestamp'
-        ];
-        if (!requiredKeys.every((x) => argKeys.includes(x))) {
-            return false;
-        }
-        return !argKeys.includes('statusCode');
-    };
-
     private static base = ({
         error,
         code,
@@ -160,7 +159,7 @@ export class ErrorFactory {
             return requiredKeys.every((x) => argKeys.includes(x));
         };
 
-        if (ErrorFactory.isModuleError(error)) {
+        if (isModuleError(error)) {
             return error as ModuleErrorModel;
         }
 

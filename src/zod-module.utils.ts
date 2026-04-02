@@ -3,6 +3,7 @@ import type { ZodType } from 'zod';
 import {
     type ErrorBaseCreatingPayload,
     ErrorFactory,
+    isModuleError,
     type ModuleErrorModel
 } from './errors.utils';
 
@@ -85,7 +86,7 @@ export const methods =
                 ) as z.infer<T[Method]['response']>;
                 return parsedResponse;
             } catch (error) {
-                if (ErrorFactory.isModuleError(error)) {
+                if (isModuleError(error)) {
                     if (sharedConfig.onError) {
                         await sharedConfig.onError(error);
                     }
