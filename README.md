@@ -15,10 +15,15 @@ Get a DDD-inspired architecture with a contract-first approach out of the box. N
 
 Batteries included!
 
-
 # TL;DR
 
 Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready backend usable via Server Actions with ready-to-use React Query hooks.
+
+# Playground
+
+(may not work on Safari)
+
+https://stackblitz.com/edit/nzmt-playground?file=app%2Fpage.tsx
 
 # Quick start with Prisma
 
