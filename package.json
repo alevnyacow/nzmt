@@ -1,13 +1,13 @@
 {
   "name": "@alevnyacow/nzmt",
-  "version": "0.31.3",
+  "version": "0.31.4",
   "description": "Next Zod Modules Toolkit",
   "keywords": ["next", "full-stack", "server", "backend", "cli", "scaffolding", "zod", "rest", "contract programming", "contract-first", "react-query", "ddd", "domain-driven"],
   "repository": {
     "type": "git",
     "url": "https://github.com/alevnyacow/nzmt.git"
   },
-  "homepage": "https://stackblitz.com/edit/nzmt-playground?file=app%2Fpage.tsx",
+  "homepage": "https://stackblitz.com/edit/nzmt-playground",
   "license": "MIT",
   "type": "module",
   "exports": {
