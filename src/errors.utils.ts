@@ -115,30 +115,30 @@ const spawnFromUnknownError = (
     return spawnBaseError({ error });
 };
 
-export class ErrorFactory {
-    static forModule = (serviceName: string) => {
-        return {
-            inMethod: (methodName: string) => {
-                return {
-                    newError: (
-                        payload: ErrorBaseCreatingPayload,
-                        cause?: unknown
-                    ): ModuleErrorModel => {
-                        const errorBase = spawnBaseError(payload);
-                        return {
-                            ...errorBase,
-                            cause: cause
-                                ? spawnFromUnknownError(cause)
-                                : null,
-                            module: serviceName,
-                            method: methodName
-                        };
-                    }
-                };
-            }
-        };
+export const spawnModuleError = (moduleName: string) => {
+    return {
+        inMethod: (methodName: string) => {
+            return {
+                newError: (
+                    payload: ErrorBaseCreatingPayload,
+                    cause?: unknown
+                ): ModuleErrorModel => {
+                    const errorBase = spawnBaseError(payload);
+                    return {
+                        ...errorBase,
+                        cause: cause
+                            ? spawnFromUnknownError(cause)
+                            : null,
+                        module: moduleName,
+                        method: methodName
+                    };
+                }
+            };
+        }
     };
+}
 
+export class ErrorFactory {
     static forController = (controllerName: string) => {
         return {
             inMethod: (methodName: string) => {

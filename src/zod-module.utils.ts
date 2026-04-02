@@ -4,7 +4,8 @@ import {
     type ErrorBaseCreatingPayload,
     ErrorFactory,
     isModuleError,
-    type ModuleErrorModel
+    type ModuleErrorModel,
+    spawnModuleError
 } from './errors.utils';
 
 type Schemas = Record<
@@ -68,7 +69,7 @@ export const methods =
                 ) as z.infer<T[Method]['payload']>;
                 const response = await handler(parsedPayload, {
                     methodError: (payload, cause) =>
-                        ErrorFactory.forModule(name)
+                        spawnModuleError(name)
                             .inMethod(methodName as string)
                             .newError(
                                 typeof payload === 'string'
@@ -96,9 +97,10 @@ export const methods =
                     throw error;
                 }
 
-                const serviceErrorGenerator = ErrorFactory.forModule(
+                const serviceErrorGenerator = spawnModuleError(
                     name
                 ).inMethod(methodName as string);
+                
                 const serviceError = serviceErrorGenerator.newError(
                     {
                         error: 'Caught unhandled module error (see `cause` field for details)'
