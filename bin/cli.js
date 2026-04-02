@@ -1269,7 +1269,7 @@ function generateQueries(lowerCase, upperCase, entity) {
         fs.writeFileSync(fileName, [
             `import { ${rootMethod === 'GET' ? 'useQuery' : 'useMutation, useQueryClient'} } from '@tanstack/react-query'`,
             `import type { ${upperCase}API } from '@${config.paths.controllers}/${requiredEntity}'`,
-            `import { apiRequest, normalizeObjectKeysOrder } from '@${config.paths.clientUtils}'`,
+            `import { apiRequest${rootMethod === 'GET' ? ', normalizeObjectKeysOrder' : ''} } from '@${config.paths.clientUtils}'`,
             '',
             `type Method = ${upperCase}API['endpoints']['${rootMethod}']`,
             ``,
@@ -1311,7 +1311,7 @@ function generateQueries(lowerCase, upperCase, entity) {
             fs.writeFileSync(fileName, [
                 `import { ${method === 'GET' ? 'useQuery' : 'useMutation, useQueryClient' } } from '@tanstack/react-query'`,
                 `import type { ${upperCase}API } from '@${config.paths.controllers}/${requiredEntity}'`,
-                `import { apiRequest, normalizeObjectKeysOrder } from '@${config.paths.clientUtils}'`,
+                `import { apiRequest${method === 'GET' ? ', normalizeObjectKeysOrder' : ''} } from '@${config.paths.clientUtils}'`,
                 '',
                 `type Method = ${upperCase}API['endpoints']['${fullMethodName}']`,
                 ``,
