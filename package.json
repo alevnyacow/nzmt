@@ -1,6 +1,6 @@
 {
   "name": "@alevnyacow/nzmt",
-  "version": "0.30.0",
+  "version": "0.30.1",
   "description": "Next Zod Modules Toolkit",
   "keywords": ["next", "full-stack", "server", "backend", "cli", "scaffolding", "zod", "rest", "contract programming", "contract-first", "react-query", "ddd", "domain-driven"],
   "repository": {
@@ -44,7 +44,7 @@
   },
   "peerDependencies": {
     "next": ">=13 <17",
-    "zod": ">=4 <5",
+    "zod": ">=3 <5",
     "inversify": ">=7 <9",
     "reflect-metadata": "^0.2.2"
   },
