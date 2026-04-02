@@ -105,8 +105,8 @@ Schema: Server Action → Service → Store → DB
 ```tsx
 'use server'
 
-import { fromDI } from "@/server/di"
-import type { UserService } from "@/server/services/user"
+import { fromDI } from '@/server/di'
+import type { UserService } from '@/server/services/user'
 
 export default async function Page() {
     /**
