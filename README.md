@@ -164,35 +164,35 @@ export default async function Page() {
 
 ## Initialization
 
-| Command | Scaffolding result |Options|
-|---------|-------------|-------|
-| `npx nzmt init`  | **init**ialization |pass `prismaClientPath:` to work with Prisma. E.g. `npx nzmt init prismaClientPath:@/generated/prisma/client`|
+| Command         | Scaffolding result | Options                                                                                                       |
+| --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `npx nzmt init` | **init**ialization | pass `prismaClientPath:` to work with Prisma. E.g. `npx nzmt init prismaClientPath:@/generated/prisma/client` |
 
 ## Complex scaffolding
 
-| Command | Scaffolding result |
-|---------|-------------|
-| `npx nzmt crud-api <name>` | CRUD via Server Actions and React Query hooks. |
-| `npx nzmt crud-service <name>` | CRUD via Server Actions (no Controllers, API Routes and React Query hooks). |
-| `npx nzmt se <name>` | **s**tored **e**ntity: entity + store (contracts linked). |
-| `npx nzmt rq` | API **r**outes and React **q**ueries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
+| Command                        | Scaffolding result                                                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npx nzmt crud-api <name>`     | CRUD via Server Actions and React Query hooks.                                                                                                                       |
+| `npx nzmt crud-service <name>` | CRUD via Server Actions (no Controllers, API Routes and React Query hooks).                                                                                          |
+| `npx nzmt se <name>`           | **s**tored **e**ntity: entity + store (contracts linked).                                                                                                            |
+| `npx nzmt rq`                  | API **r**outes and React **q**ueries for all of your controllers. This command will also remove endpoints which don't exist anymore with according React query hooks |
 
 ## Primary server modules scaffolding
 
-| Command | Scaffolding result |Options|
-|---------|-------------|-------|
-| `npx nzmt e <name>`  | **e**ntity ||
-| `npx nzmt vo <name>` | **v**alue **o**bject ||
-| `npx nzmt cs <name>`  | **c**ustom **s**tore (all schemas are `z.object({})`) ||
-| `npx nzmt s <name>`  | **s**ervice |`i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore`|
-| `npx nzmt c <name>`  | **c**ontroller |`i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option|
+| Command              | Scaffolding result                                    | Options                                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npx nzmt e <name>`  | **e**ntity                                            |                                                                                                                                                                                                         |
+| `npx nzmt vo <name>` | **v**alue **o**bject                                  |                                                                                                                                                                                                         |
+| `npx nzmt cs <name>` | **c**ustom **s**tore (all schemas are `z.object({})`) |                                                                                                                                                                                                         |
+| `npx nzmt s <name>`  | **s**ervice                                           | `i:UserStore,Logger` will automatically inject `UserStore` and `Logger`. E.g. `npx nzmt s shop i:UserStore,ProductStore` will create `ShopService` with already injected `UserStore` and `ProductStore` |
+| `npx nzmt c <name>`  | **c**ontroller                                        | `i:UserService` will automatically inject `UserService`. `Logger` and `Guards` are injected by default regardless of `i:` option                                                                        |
 
 ## Auxiliary server modules scaffolding
 
-| Command | Scaffolding result |
-|---------|-------------|
-| `npx nzmt p <name>`  | **p**rovider |
-| `npx nzmt i <name>`  | **i**nfrastructure module |
+| Command             | Scaffolding result        |
+| ------------------- | ------------------------- |
+| `npx nzmt p <name>` | **p**rovider              |
+| `npx nzmt i <name>` | **i**nfrastructure module |
 
 
 # How to implement your own methods
@@ -299,17 +299,17 @@ Once you done implementing controller methods, just run `nmx nzmt rq`. This comm
 
 `NZMT` combines the best of both worlds in one package while staying in plain Next.js:
 
-| Feature           | NZMT | tRPC | Nest |
-| ----------------- | ---- | ---- | ---- |
-| Type safety       | ✅  - including run-time checks  | ✅    | ⚠️   |
-| Scaffolding       | ✅  - production-ready full-stack  | ❌    | ⚠️   |
-| Architecture      | contract-first, domain-focused | ❌    | module-centric, tightly coupled |
-| Boilerplate       | ✅ - Low  | ✅   | ❌ - High |
-| No framework lock-in | ✅    | ✅    | ❌    |
-| Single source of truth | ✅ (schemas) | ⚠️ (types only) | ❌ |
-| Time to first feature | ✅ instant full-stack | ⚡ fast | 🐢 slow |
-| Learning curve       | Medium | Low | High |
-| Code ownership       | ✅ full (generated, editable) | ✅ | ⚠️ (framework patterns) |
+| Feature                | NZMT                                          | tRPC   | Nest                            |
+| ---------------------- | --------------------------------------------- | ------ | ------------------------------- |
+| Architecture           | contract-first, domain-focused                | ❌      | module-centric, tightly coupled |
+| Learning curve         | Medium                                        | Low    | High                            |
+| Type safety            | ✅  - including run-time checks out of the box | ✅      | ⚠️                               |
+| Scaffolding            | ✅  - production-ready full-stack              | ❌      | ⚠️                               |
+| Boilerplate            | ✅ - Low                                       | ✅      | ❌ - High                        |
+| No framework lock-in   | ✅                                             | ✅      | ❌                               |
+| Single source of truth | ✅ (schemas)                                   | ⚠️      | ❌                               |
+| Time to first feature  | ✅ instant full-stack                          | ⚡ fast | 🐢 slow                          |
+| Code ownership         | ✅ full (generated, editable)                  | ✅      | ⚠️ (framework patterns)          |
 
 
 ## What does domain-focused mean?
