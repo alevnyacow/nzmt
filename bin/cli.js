@@ -766,7 +766,7 @@ function generateStores(lowerCase, upperCase, withEntityPreset) {
     insertAfterLineInFile(
         diEntriesPath,
         '// Stores',
-        prismaPath ? `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}PrismaStore, dev: ${upperCase}PrismaStore },` : `\t${upperCase}Store: ${upperCase}RAMStore,`,
+        prismaPath ? `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}PrismaStore, dev: ${upperCase}PrismaStore },` : `\t${upperCase}Store: { test: [${upperCase}RAMStore, (x) => x.inSingletonScope()], prod: ${upperCase}RAMStore, dev: ${upperCase}RAMStore },`,
     )
 
 }
