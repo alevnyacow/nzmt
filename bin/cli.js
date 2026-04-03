@@ -991,7 +991,7 @@ function generateService(lowerCase, upperCase, store) {
         ...importInjections,
         "",
         "@injectable()",
-        `export class ${upperCase}Service {`,
+        `export class ${upperCase}Service implements Module.Methods<typeof ${lowerCase}ServiceMetadata> {`,
         `\tprivate methods = Module.methods(${lowerCase}ServiceMetadata)`,
         ``,
         `\tconstructor(`,
