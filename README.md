@@ -8,7 +8,7 @@
   <img src='https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt'></img>
 </p>
 
-Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**. 
+Scaffold Next.js full-stack modules in seconds with **Next Zod Modules Toolkit (NZMT)**. 
 
 Get a domain-focused architecture with a contract-first approach out of the box.
 
@@ -23,8 +23,8 @@ https://stackblitz.com/edit/nzmt-playground
 
 # What you get
 
-Get production-ready backend + React Query hooks after one CLI command with NZMT. Install and initialize it, then run:
- 
+After installing and initializing NZMT, run one CLI command to generate a production-ready backend with React Query hooks:
+
 ```bash
 npx nzmt crud-api user
 ```
@@ -43,18 +43,10 @@ app/api/user/... # api routes
 ui/shared/queries/user/... # react queries
 ```
 
-Everything is already setup and ready-to-use after a few tweaks. See `Quick start with Prisma` section for more detailed information.
+Features DI, logging, in-memory stores, unified errors, and endpoint guards. Everything is ready after a few tweaks — see `Quick start with Prisma` for details.
 
-NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. All code is editable, so you stay in full control. Full `crud-api` is only one of cases, you can scaffold entities, stores, services, controllers and infrastructure helpers on its own and combine them any way you want. List of all NZMT cli commands is provided in `CLI commands glossary` sections.
+All code is editable — scaffold parts individually or together. CLI commands are listed in `CLI commands glossary`. 
 
-Fully wired flow:
-```bash
-# client fetching
-Client → React Query → API → Controller → Service → Store → DB
-
-# server actions
-Server Action → Service → Store → DB
-```
 
 # Quick start with Prisma
 
