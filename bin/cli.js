@@ -118,6 +118,9 @@ function createDefaultConfig() {
                 prisma: {
                     clientPath: prismaClientPath
                 },
+            },
+            services: {
+                defaultInjections: []
             }
         } : {
             coreFolder,
@@ -133,6 +136,9 @@ function createDefaultConfig() {
                 sharedErrors: '/domain/errors',
                 queries: '/ui/shared/queries',
                 clientUtils: '/ui/shared/utils'
+            },
+            services: {
+                defaultInjections: []
             }
         }, null, '\t'))
     }
