@@ -6,7 +6,6 @@
 <p align="center">
   <a href="https://badge.fury.io/js/@alevnyacow%2Fnzmt" target="_blank"><img src='https://badge.fury.io/js/@alevnyacow%2Fnzmt.svg'></img></a>
   <img src='https://img.shields.io/npm/l/%40alevnyacow%2Fnzmt'></img>
-  <img src='https://img.shields.io/bundlephobia/minzip/%40alevnyacow/nzmt'></img>
 </p>
 
 Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**. 
