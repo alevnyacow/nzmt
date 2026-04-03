@@ -314,7 +314,7 @@ Once you done implementing controller methods, just run `nmx nzmt rq`. This comm
 
 ## What does domain-focused mean?
 
-NZMT puts your business domain first. Entities drive the architecture, so backend and frontend stay consistent, and all layers are generated from your entity contracts and schemas.
+NZMT puts your business domain first. Entities drive the architecture, so backend and frontend stay consistent.
 
 ## What does contract-first mean?
 
@@ -324,9 +324,9 @@ The behavior of all server modules in NZMT is governed by Zod schemas. Function 
 
 Yes — everything is fully editable, including configuration. Think of NZMT as a shadcn-style approach for full-stack: scaffold first, then fully own the code. Moreover, in most of the cases your changes are preserved on subsequent generations. For example, if you modify a generated query and run `npx nzmt rq` later, your edits stay intact.
 
-## Do I really need to understand DI and other fancy concepts to use NZMT?
+## Do I really need to understand DI and other fancy concepts to use NZMT effectively?
 
-No. NZMT handles dependency injection (DI) for you using `inversifyjs`. You don’t need to set it up manually.
+Not really. NZMT handles dependency injection (DI) for you using `inversifyjs`. You don’t need to set it up manually.
 To get an instance of a service anywhere in your server code, just use:
 
 ```tsx
