@@ -55,7 +55,7 @@ export type OnErrorHandler = (request: {
 }) => Promise<void>;
 
 export type EndpointList<T extends Metadata> = {
-    [K in keyof T['schemas']]: (request: NextRequest) => Promise<Response>;
+    [K in keyof T['schemas']]: (request: NextRequest) => Promise<ReturnType<typeof jsonResponse>>;
 };
 
 type EndpointLogic<T extends ZodAPISchemas> = {
