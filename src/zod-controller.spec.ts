@@ -20,7 +20,7 @@ const GET = testControllerEndpoints('GET', async ({ id }) => {
 
 
 test('GET test', async () => {
-    const data = await GET(new NextRequest('http://localhost:3000?id=hello'))
+    const data = await GET(new NextRequest('http://localhost.mock.url:3000?id=hello'))
     const responseBody = await data.json() as { idFromQuery: string }
     expect(responseBody.idFromQuery).toBe('hello')
 })
