@@ -10,19 +10,49 @@
 
 Scaffold full-stack modules in Next.js in seconds with **Next Zod Modules Toolkit (NZMT)**. 
 
-Get a DDD-inspired architecture with a contract-first approach out of the box. NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. 
+Get a DDD-inspired architecture with a contract-first approach out of the box.
 
 Batteries included! ✨
 
-# TL;DR
 
-Initialize NZMT once, run the scaffolder, and tweak a few files to get a production-ready backend usable via Server Actions with ready-to-use React Query hooks.
+# Try it!
 
-# Playground on Stackblitz
-
-(may not work on Safari)
+(stackblitz may not work on Safari)
 
 https://stackblitz.com/edit/nzmt-playground
+
+# What you get
+
+Production-ready backend + React Query hooks in seconds. After running:
+
+```bash
+npx nzmt crud-api user
+```
+
+You instantly have:
+
+```bash
+server/
+  entities/user/... # user entity
+  stores/user/... # user stores (contract, in-memory, prisma)
+  services/user/... # service
+  controllers/user/... # API controller
+
+app/api/user/... # api routes
+
+ui/shared/queries/user/... # react queries
+```
+
+NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. All code is editable, so you stay in full control. Full `crud-api` is only one of cases, you can scaffold entities, stores, services, controllers and infrastructure helpers on its own and combine them any way you want. Glossary of NZMT cli commands is provided below.
+
+Fully wired flow:
+```bash
+# client fetching
+Client → React Query → API → Controller → Service → Store → DB
+
+# server actions
+Server Action → Service → Store → DB
+```
 
 # Quick start with Prisma
 
@@ -296,12 +326,10 @@ A “Repository” is a specific design pattern for managing data. NZMT prefers 
 
 `NZMT` combines the best of both worlds in one package while staying in plain Next.js:
 
-- From tRPC — type safety and developer experience
-- From NestJS — structured architecture (but more DDD-inspired) with intuitive DI
-
-Plus:
-
-- No framework lock-in
-- No magic runtime
-- Full control over your code
-- No extra client-server layers
+| Feature           | NZMT | tRPC | Nest |
+| ----------------- | ---- | ---- | ---- |
+| Type safety       | ✅    | ✅    | ⚠️   |
+| Scaffolding       | ✅    | ❌    | ⚠️   |
+| Architecture      | ✅    | ❌    | ✅    |
+| Boilerplate       | Low  | Low  | High |
+| No framework lock-in | ✅    | ✅    | ❌    |
