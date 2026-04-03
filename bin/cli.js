@@ -930,6 +930,7 @@ function toKebabFromPascal(str) {
 
 function generateService(lowerCase, upperCase, store) {
     const folder = config?.paths?.services ? path.resolve(process.cwd(), `${config.coreFolder}${config?.paths?.services}`, entityName) : path.resolve(process.cwd(), entityName);
+    const defaultInjections = config?.services?.defaultInjections
 
     const proxiedStore = store || options.find(x => x.startsWith('p:'))?.split(':')?.at(-1)
     if (proxiedStore && !proxiedStore.endsWith('Store')) {
@@ -940,6 +941,8 @@ function generateService(lowerCase, upperCase, store) {
     if (proxiedStore && !injections.includes(proxiedStore)) {
         injections = injections.concat(proxiedStore)
     }
+
+    injections = [...defaultInjections, ...injections.filter(x => !defaultInjections.includes(x))]
 
     const importInjections = injections.map((i) => {
         if (i.endsWith('Service') || i.endsWith('Controller')) {
