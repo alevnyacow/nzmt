@@ -1126,7 +1126,7 @@ function generateController(upperCase, lowerCase, crudService) {
         ...importInjections,
         ``,
         `@injectable()`,
-        `export class ${upperCase}Controller {`,
+        `export class ${upperCase}Controller implements Controller.EndpointList<typeof ${lowerCase}ControllerMetadata> {`,
         `\tconstructor(`,
         ...injections.map(x => `\t\t@inject('${x}' satisfies DITokens) private readonly ${x.charAt(0).toLowerCase() + x.slice(1)}: ${x},`),
         `\t) {}`,
