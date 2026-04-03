@@ -295,7 +295,24 @@ Once you done implementing controller methods, just run `nmx nzmt rq`. This comm
 
 # FAQ
 
-## What does DDD-inspired mean?
+## Why not use Nest or tRPC?
+
+`NZMT` combines the best of both worlds in one package while staying in plain Next.js:
+
+| Feature           | NZMT | tRPC | Nest |
+| ----------------- | ---- | ---- | ---- |
+| Type safety       | ✅  - including run-time checks  | ✅    | ⚠️   |
+| Scaffolding       | ✅  - production-ready full-stack  | ❌    | ⚠️   |
+| Architecture      | contract-first, domain-focused | ❌    | module-centric, tightly coupled |
+| Boilerplate       | ✅ - Low  | ✅   | ❌ - High |
+| No framework lock-in | ✅    | ✅    | ❌    |
+| Single source of truth | ✅ (schemas) | ⚠️ (types only) | ❌ |
+| Time to first feature | ✅ instant full-stack | ⚡ fast | 🐢 slow |
+| Learning curve       | Medium | Low | High |
+| Code ownership       | ✅ full (generated, editable) | ✅ | ⚠️ (framework patterns) |
+
+
+## What does domain-focused mean?
 
 NZMT puts your business domain first. Entities drive the architecture, so backend and frontend stay consistent, and all layers are generated from your entity contracts and schemas.
 
@@ -323,15 +340,3 @@ Here, `fromDI` is strongly typed — your IDE will give autocomplete automatical
 ## Why data layer modules are called `Stores` and not `Repositories`?
 
 A “Repository” is a specific design pattern for managing data. NZMT prefers Stores — a simple, flexible abstraction for your data layer that can adapt to your needs regardless of the specific pattern. This approach helps to keep your code simple, and it has been successfully used in other languages, like Go.
-
-## Why not use Nest or tRPC?
-
-`NZMT` combines the best of both worlds in one package while staying in plain Next.js:
-
-| Feature           | NZMT | tRPC | Nest |
-| ----------------- | ---- | ---- | ---- |
-| Type safety       | ✅    | ✅    | ⚠️   |
-| Scaffolding       | ✅    | ❌    | ⚠️   |
-| Architecture      | ✅    | ❌    | ✅    |
-| Boilerplate       | Low  | Low  | High |
-| No framework lock-in | ✅    | ✅    | ❌    |
