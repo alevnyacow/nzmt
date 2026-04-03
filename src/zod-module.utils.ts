@@ -102,9 +102,8 @@ export const methods =
 
                 const serviceError = serviceErrorGenerator.newError(
                     {
-                        error: 'Caught unhandled module error (see `cause` field for details)'
-                    },
-                    error
+                        error
+                    }
                 );
                 if (config.onError) {
                     await config.onError(serviceError);
