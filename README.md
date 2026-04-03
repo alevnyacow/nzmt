@@ -23,13 +23,13 @@ https://stackblitz.com/edit/nzmt-playground
 
 # What you get
 
-Production-ready backend + React Query hooks in seconds. After running:
-
+Get production-ready backend + React Query hooks after one CLI command with NZMT. Install and initialize it, then run:
+ 
 ```bash
 npx nzmt crud-api user
 ```
 
-You instantly have:
+This will instantly scaffold:
 
 ```bash
 server/
@@ -43,7 +43,9 @@ app/api/user/... # api routes
 ui/shared/queries/user/... # react queries
 ```
 
-NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. All code is editable, so you stay in full control. Full `crud-api` is only one of cases, you can scaffold entities, stores, services, controllers and infrastructure helpers on its own and combine them any way you want. Glossary of NZMT cli commands is provided below.
+Everything is already setup and ready-to-use after a few tweaks. See `Quick start with Prisma` section for more detailed information.
+
+NZMT also comes with useful infrastructure like DI, logging, in-memory stores, unified errors, and endpoint guards. All code is editable, so you stay in full control. Full `crud-api` is only one of cases, you can scaffold entities, stores, services, controllers and infrastructure helpers on its own and combine them any way you want. List of all NZMT cli commands is provided in `CLI commands glossary` sections.
 
 Fully wired flow:
 ```bash
@@ -158,7 +160,7 @@ export default async function Page() {
 }
 ```
 
-# Scaffolder commands glossary
+# CLI commands glossary
 
 ## Initialization
 
