@@ -54,6 +54,12 @@ export type OnErrorHandler = (request: {
     req: NextRequest;
 }) => Promise<void>;
 
+export type Methods<T extends Metadata> = {
+    [K in keyof T['schemas']]: (
+        payload: z.infer<T['schemas'][K]['query']> & z.infer<T['schemas'][K]['body']>
+    ) => Promise<z.infer<T['schemas'][K]['response']>>;
+};
+
 type EndpointLogic<T extends ZodAPISchemas> = {
     handler: (
         payload: (T['query'] extends ZodType ? z.infer<T['query']> : {}) &
