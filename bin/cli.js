@@ -1470,3 +1470,67 @@ if (command === 'w') {
     }
     generateWidget(entityName, rootPath)
 }
+
+function generateLayoutedWidget(name, rootPath) {
+    const [lowerCase, upperCase] = camelizeVariants(name)
+
+    const widgetsPath = config.paths.widgets
+    const root = findProjectRoot()
+
+    const folder = path.resolve(root, `${config.coreFolder}${widgetsPath}`, rootPath ?? '.', name)
+    fs.mkdirSync(folder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(folder, `${name}.headless-widget.tsx`), [
+        `import { FC } from 'react'`,
+        `import { ${upperCase}WidgetLayoutProps } from './${name}.widget-layout'`,
+        ``,
+        `export type ${upperCase}HeadlessWidgetProps = {`,
+        `\tLayout: FC<${upperCase}WidgetLayoutProps>,`,
+        ``,
+        `export const ${upperCase}HeadlessWidget: FC<${upperCase}HeadlessWidgetProps> = ({ Layout }) => {`,
+        `\treturn <Layout />`,
+        `}`
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `${name}.widget-layout.module.css`), [
+       ''
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `${name}.widget-layout.tsx`), [
+        `import { FC } from 'react'`,
+        `import styles from './${name}.widget-layout.module.css'`,
+        ``,
+        `export type ${upperCase}WidgetLayoutProps = {}`,
+        ``,
+        `export const ${upperCase}WidgetLayout: FC<${upperCase}WidgetLayoutProps> = ({}) => {`,
+        `\treturn undefined`,
+        `}`
+    ].join('\n'))    
+
+    fs.writeFileSync(path.resolve(folder, `${name}.widget.tsx`), [
+        `import { FC } from 'react'`,
+        `import { ${upperCase}HeadlessWidget, ${upperCase}HeadlessWidgetProps } from './${name}.headless-widget'`,
+        `import { ${upperCase}WidgetLayout } from './${name}.widget-layout'`,
+        ``,
+        `export type ${upperCase}WidgetProps = Omit<${upperCase}HeadlessWidgetProps, 'Layout'>`,
+        ``,
+        `export const ${upperCase}Widget: FC<${upperCase}WidgetProps> = (props) => {`,
+        `\treturn <${upperCase}HeadlessWidget Layout={${upperCase}WidgetLayout} {...props}/>`,
+        `}`
+    ].join('\n'))    
+
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        `export * from './${name}.widget'`
+    ].join('\n'))
+}
+
+
+if (command === 'lw') {
+    let rootPath = undefined
+    if (entityName.includes('/')) {
+        const splitData = entityName.split('/')
+        entityName = splitData.pop()
+        rootPath = splitData.join('/')
+    }
+    generateLayoutedWidget(entityName, rootPath)
+}
