@@ -45,7 +45,7 @@ ui/shared/queries/user/... # react queries
 
 Features DI, logging, in-memory stores, unified errors, and endpoint guards. Everything is ready after a few tweaks — see `Quick start with Prisma` for details.
 
-All code is editable — scaffold parts individually or together. CLI commands are listed in `CLI commands glossary`. 
+All code is editable — scaffold parts individually or together. You can also scaffold front-end widgets. CLI commands are listed in `CLI commands glossary`. 
 
 
 # Quick start with Prisma
@@ -186,6 +186,12 @@ export default async function Page() {
 | `npx nzmt p <name>` | **p**rovider              |
 | `npx nzmt i <name>` | **i**nfrastructure module |
 
+## UI modules scaffolding
+
+| Command             | Scaffolding result        |
+| ------------------- | ------------------------- |
+| `npx nzmt w <name>` | **w**idget                |
+| `npx nzmt lw <name>` | **l**ayouted **w**idget - widget with separated view layout |
 
 # How to implement your own methods
 
