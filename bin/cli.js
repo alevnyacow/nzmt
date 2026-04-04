@@ -1432,3 +1432,40 @@ if (command.toLowerCase() === 'crud-api') {
     process.exit(0)
 }
 
+function generateWidget(name, rootPath) {
+    const [lowerCase, upperCase] = camelizeVariants(name)
+
+    const widgetsPath = config.paths.widgets
+    const root = findProjectRoot()
+
+    const folder = path.resolve(root, widgetsPath, rootPath ?? '.', name)
+    fs.mkdirSync(folder, { recursive: true })
+
+    fs.writeFileSync(path.resolve(folder, `${lowerCase}.widget.tsx`), [
+        `import { FC } from 'react'`,
+        `import styles from './${lowerCase}.widget.module.css'`,
+        ``,
+        `export type ${upperCase}WidgetProps = {}`,
+        ``,
+        `export const ${upperCase}Widget: FC<${upperCase}WidgetProps> = ({ }) => {`,
+        `\treturn undefined`,
+        `}`
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `${lowerCase}.widget.module.css`), [
+       ''
+    ].join('\n'))
+
+    fs.writeFileSync(path.resolve(folder, `index.ts`), [
+        `export * from './${name}.widget'`
+    ].join('\n'))
+}
+
+if (command === 'w') {
+    let rootPath = undefined
+    const rootPathOption = (options ?? []).find(x => x.startsWith('root:'))
+    if (rootPathOption) {
+        rootPath = rootPathOption.split(':')[1]
+    }
+    generateWidget(entityName, rootPath)
+}
