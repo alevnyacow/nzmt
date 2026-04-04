@@ -1486,6 +1486,7 @@ function generateLayoutedWidget(name, rootPath) {
         ``,
         `export type ${upperCase}HeadlessWidgetProps = {`,
         `\tLayout: FC<${upperCase}WidgetLayoutProps>,`,
+        `}`,
         ``,
         `export const ${upperCase}HeadlessWidget: FC<${upperCase}HeadlessWidgetProps> = ({ Layout }) => {`,
         `\treturn <Layout />`,
