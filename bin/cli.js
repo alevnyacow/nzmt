@@ -1463,9 +1463,10 @@ function generateWidget(name, rootPath) {
 
 if (command === 'w') {
     let rootPath = undefined
-    const rootPathOption = (options ?? []).find(x => x.startsWith('root:'))
-    if (rootPathOption) {
-        rootPath = rootPathOption.split(':')[1]
+    if (entityName.includes('/')) {
+        const splitData = entityName.split('/')
+        entityName = splitData.pop()
+        rootPath = splitData.join('/')
     }
     generateWidget(entityName, rootPath)
 }
