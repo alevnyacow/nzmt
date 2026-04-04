@@ -112,7 +112,8 @@ function createDefaultConfig() {
                 valueObjects: '/domain/value-objects',
                 sharedErrors: '/domain/errors',
                 queries: '/ui/shared/queries',
-                clientUtils: '/ui/shared/utils'
+                clientUtils: '/ui/shared/utils',
+                widgets: '/ui/widgets'
             },
             store: {
                 prisma: {
@@ -135,7 +136,8 @@ function createDefaultConfig() {
                 valueObjects: '/domain/value-objects',
                 sharedErrors: '/domain/errors',
                 queries: '/ui/shared/queries',
-                clientUtils: '/ui/shared/utils'
+                clientUtils: '/ui/shared/utils',
+                widgets: '/ui/widgets'
             },
             services: {
                 defaultInjections: []
