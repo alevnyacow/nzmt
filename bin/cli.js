@@ -1438,10 +1438,10 @@ function generateWidget(name, rootPath) {
     const widgetsPath = config.paths.widgets
     const root = findProjectRoot()
 
-    const folder = path.resolve(root, widgetsPath, rootPath ?? '.', name)
+    const folder = path.resolve(root, `${config.coreFolder}${widgetsPath}`, rootPath ?? '.', name)
     fs.mkdirSync(folder, { recursive: true })
 
-    fs.writeFileSync(path.resolve(folder, `${lowerCase}.widget.tsx`), [
+    fs.writeFileSync(path.resolve(folder, `${name}.widget.tsx`), [
         `import { FC } from 'react'`,
         `import styles from './${lowerCase}.widget.module.css'`,
         ``,
@@ -1452,7 +1452,7 @@ function generateWidget(name, rootPath) {
         `}`
     ].join('\n'))
 
-    fs.writeFileSync(path.resolve(folder, `${lowerCase}.widget.module.css`), [
+    fs.writeFileSync(path.resolve(folder, `${name}.widget.module.css`), [
        ''
     ].join('\n'))
 
